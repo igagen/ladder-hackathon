@@ -13,7 +13,6 @@ class Question
     @b = min + Math.ceil(Math.random() * (max - min))
     @x = @a * @b
 
-
 class Game
   NUM_QUESTIONS: 50
 
@@ -30,7 +29,7 @@ class Game
 
     Games[@id] = @
 
-    @startTimer(10) # This will eventually go somewhere else
+    @startTimer(180) # This will eventually go somewhere else
 
   start: ->
     @state = 'started'

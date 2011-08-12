@@ -59,7 +59,6 @@ class GameView extends Backbone.View
       @minutes.html("00")
       @seconds.html("00")
       @timer.addClass('finished')
-      alert "Game Over!"
       clearInterval @timerInterval
 
 
