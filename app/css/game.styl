@@ -8,15 +8,15 @@
 
 #message
   text-align center
-  padding 20px
+  margin 0 auto 15px
+  width 250px
+  padding 15px
+  font-size 18px
   opacity 1
   border-radius 5px
   border 1px solid grey
   z-index 10
-  -moz-transition-property opacity
-  -moz-transition-duration 0.4s
-  -webkit-transition-property opacity
-  -webkit-transition-duration 0.4s
+  anim(opacity, 0.7s)
 
 #message.hidden
   opacity 0
@@ -25,6 +25,11 @@
   position relative
   padding 25px
   font-size 35px
+  margin 0 auto
+  width 500px
+  border-radius 5px
+  border 1px solid #ccc
+
   span, input
     padding 10px
 
@@ -33,12 +38,32 @@
     border-radius 3px
     padding 10px
     margin 10px
-    font-size 35px
 
   input[type='text']
     border none
     background-color #ddd
     width 150px
+
+#answer
+  font-size 35px
+
+#confirm-button
+  vertical-gradient(#0da5f4, #0a7cb8)
+  top -6px
+  font-size 20px
+
+#confirm-button:active
+  top -5px
+
+.button
+  position relative
+
+.button:hover
+  cursor pointer
+  color white
+
+.button:active
+  top -1px
 
 #players
   position absolute
@@ -47,9 +72,10 @@
   width 100%
 
   p
-    font-size 20px
     text-align left
-    padding-bottom 10px
+    font-size 15px
+    font-weight bold
+    padding-bottom 5px
 
   .updated
     background-color yellow
@@ -60,16 +86,16 @@
   .response
     display inline-block
     float left
-    width 30px
-    height 30px
-    border 1px solid black
+    width 20px
+    height 20px
+    border 2px solid black
     border-left-width 0
     box-shadow(2px 2px 10px #333)
 
   .response:first-child
     border-top-left-radius 5px
     border-bottom-left-radius 5px
-    border-left-width 1px
+    border-left-width 2px
 
   .response:last-child
     border-top-right-radius 5px

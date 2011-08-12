@@ -8,7 +8,6 @@
 /**
 	.bind() support
 **/
-debugger;
 
 if ( !Function.prototype.bind ) {
   Function.prototype.bind = function( obj ) {
@@ -5611,7 +5610,6 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
         SS.models[name] = new RTM;
         SS.models[name].name = name;
       }
-      debugger
       eval('SS.server = ' + data.api.server);
       setupAPI(SS.server, []);
       SS.socket.ready = true;

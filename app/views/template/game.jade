@@ -1,14 +1,17 @@
 #game
   h2.title Open Game
 
-  #message.hidden
+  #message.hidden ...
 
   #question
     <span id="a">A</span>x<span id="b">B</span>=
     input#answer(type = "text")
-    input#confirm-button(type = "submit", value="Confirm")
+    input#confirm-button.button(type = "submit", value="Confirm")
 
   #players
     #alex
-      p Alex: <span class='points'>0 pts</span>
+      p
+        span.name Alex
+        |: 
+        span.points 0pts
       .answers

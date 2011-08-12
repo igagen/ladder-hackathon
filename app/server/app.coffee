@@ -6,6 +6,7 @@ Users = {}
 class User
   constructor: (@username) ->
     @id = NextUserId++
+
 class Question
   constructor: (min, max) ->
     @a = min + Math.ceil(Math.random() * (max - min))

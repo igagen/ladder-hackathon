@@ -1,4 +1,3 @@
-# Hack for testing
 Index = 0
 Username = 'user'
 
@@ -17,6 +16,4 @@ class Router extends Backbone.Router
       new GameView { model: game, gameData: gameData, container: $("#content") }
 
 
-window.onload = ->
-  router = new Router()
-  Backbone.history.start()
+window.Router = Router
