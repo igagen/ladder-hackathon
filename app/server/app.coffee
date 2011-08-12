@@ -30,11 +30,17 @@ class Game
 
     Games[@id] = @
 
+    @startTimer(10) # This will eventually go somewhere else
+
   start: ->
     @state = 'started'
 
   finish: ->
     @state = 'finished'
+
+  startTimer: (seconds) ->
+    @startTime = new Date()
+    @duration = seconds
 
   join: (player2) ->
     @player2 = player2

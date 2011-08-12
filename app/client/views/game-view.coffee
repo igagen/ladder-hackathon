@@ -14,6 +14,9 @@ class GameView extends Backbone.View
     @message = @.$("#message")
     @answer = @.$("#answer")
     @players = @.$("#players")
+    @timer = @.$("#timer")
+    @minutes = @.$("#timer .minutes")
+    @seconds = @.$("#timer .seconds")
     @confirmButton = @.$("#confirm")
     @currentQuestion = @game.answers[@user].length
     @question = @game.questions[@currentQuestion]
@@ -33,11 +36,45 @@ class GameView extends Backbone.View
         else
           answers.append('<div class="response incorrect" />')
 
+    @startTimer()
+
   render: ->
     template = $("#game-template")
     $(@el).html template.html()
     @container.html('')
     @container.prepend(@el)
+
+  renderTimer: ->
+    remainingTime = @totalTime - @elapsedTime
+    if remainingTime > 0
+      remainingMinutes = Math.floor(remainingTime / 60)
+      remainingSeconds = Math.floor(remainingTime % 60)
+      # zero pad
+      remainingMinutes = "0" + remainingMinutes if remainingMinutes < 10
+      remainingSeconds = "0" + remainingSeconds if remainingSeconds < 10
+
+      @minutes.html(remainingMinutes)
+      @seconds.html(remainingSeconds)
+    else
+      @minutes.html("00")
+      @seconds.html("00")
+      @timer.addClass('finished')
+      alert "Game Over!"
+      clearInterval @timerInterval
+
+
+  startTimer: ->
+    @startTime = new Date(@game.startTime)
+    @totalTime = @game.duration
+    @elapsedTime = 0
+    @timerInterval = setInterval @updateTimer, 250
+    @updateTimer()
+
+  updateTimer: =>
+    currentTime = new Date()
+    elapsedMillis = currentTime - @startTime
+    @elapsedTime = Math.floor(elapsedMillis / 1000)
+    @renderTimer()
 
   renderQuestion: ->
     @a = @.$("#a")
