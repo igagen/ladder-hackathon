@@ -5,6 +5,7 @@ class GameView extends Backbone.View
   initialize: (options) ->
     $(window).bind "keypress", @handleKeyPress
 
+    @user = options.user
     @game = options.gameData
     @container = options.container
 

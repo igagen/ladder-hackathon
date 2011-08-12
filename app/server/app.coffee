@@ -15,11 +15,13 @@ class Question
 
 class Game
   NUM_QUESTIONS: 50
+
   constructor: (@player1, @min, @max) ->
     @id = NextGameId++
     @questions = new Array(@NUM_QUESTIONS)
     @player2 = null
     @currentQuestion = 0
+    @answers = { player1: [], player2: [] }
 
     for i in [0...@NUM_QUESTIONS]
       @questions[i] = new Question(@min, @max)
@@ -29,6 +31,7 @@ class Game
   join: (player2) ->
     return { error: 'Game is not open' } unless isOpen()
     @player2 = player2
+    console.log "#{player2} Joined!"
     return @
 
   isOpen: ->
@@ -53,8 +56,15 @@ exports.actions =
     else
       cb false
 
-  square: (number, cb) ->
-    cb(number * number)
+  getGame: (id, cb) ->
+    game = Games[id]
+    if game?
+      cb game
+    else
+      cb { error: "No game with id '#{id}'" }
+
+  answer: (playerUserName, gameId, questionId, answer, cb) ->
+
 
   createOrJoinGame: (playerUserName, cb) ->
     player = Users[playerUserName]
@@ -66,7 +76,7 @@ exports.actions =
       for game in Games
         if game.isOpen()
           game.join(player)
-          return cb(game, 'joined')
+          return cb(game)
       return cb(new Game(player, 11, 19))
     else
       cb({ error: 'invalid player username' })

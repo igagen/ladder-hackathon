@@ -1,19 +1,28 @@
-Index = 0
-Username = 'user'
-
 class Router extends Backbone.Router
   routes:
-    "": "root"
-    "/": "root"
-    "/game": "createOrJoinGame"
+    "": "createOrJoinGame"
+    "/": "createOrJoinGame"
+    "/game/:id": "game"
 
-  root: ->
+  game: (id) ->
+    @loadUser()
+    SS.server.app.getGame id, (gameData) ->
+      new GameView { user: @user, gameData: gameData, container: $("#content") }
 
   createOrJoinGame: ->
-    username = "#{Username}#{Index++}"
-    SS.server.app.createOrJoinGame username, (gameData) ->
-      game = new Game { id: gameData.id, gameData: gameData }
-      new GameView { model: game, gameData: gameData, container: $("#content") }
+    @loadUser()
+    SS.server.app.createOrJoinGame @user, (gameData) ->
+      window.location.hash = "#/game/#{gameData.id}"
+      new GameView { user: @user, gameData: gameData, container: $("#content") }
+
+  loadUser: ->
+    username = localStorage.getItem 'username'
+    if username?
+      @user = username
+    else
+      @user = prompt 'Username:'
+      localStorage.setItem 'username', @user
+
 
 
 window.Router = Router
