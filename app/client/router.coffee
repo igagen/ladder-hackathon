@@ -6,23 +6,21 @@ class Router extends Backbone.Router
 
   game: (id) ->
     @loadUser()
-    SS.server.app.getGame id, (gameData) ->
+    SS.server.app.getGame id, (gameData) =>
       new GameView { user: @user, gameData: gameData, container: $("#content") }
 
   createOrJoinGame: ->
     @loadUser()
-    SS.server.app.createOrJoinGame @user, (gameData) ->
+    SS.server.app.createOrJoinGame @user, (gameData) =>
       window.location.hash = "#/game/#{gameData.id}"
-      new GameView { user: @user, gameData: gameData, container: $("#content") }
 
   loadUser: ->
-    username = localStorage.getItem 'username'
-    if username?
-      @user = username
+    user = localStorage.getItem 'user'
+    if user?
+      @user = user
     else
       @user = prompt 'Username:'
-      localStorage.setItem 'username', @user
-
+      localStorage.setItem 'user', @user
 
 
 window.Router = Router

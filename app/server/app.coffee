@@ -13,6 +13,7 @@ class Question
     @b = min + Math.ceil(Math.random() * (max - min))
     @x = @a * @b
 
+
 class Game
   NUM_QUESTIONS: 50
 
@@ -20,22 +21,47 @@ class Game
     @id = NextGameId++
     @questions = new Array(@NUM_QUESTIONS)
     @player2 = null
-    @currentQuestion = 0
-    @answers = { player1: [], player2: [] }
+    @answers = {}
+    @answers[@player1] = []
+    @state = 'open'
 
     for i in [0...@NUM_QUESTIONS]
       @questions[i] = new Question(@min, @max)
 
     Games[@id] = @
 
+  start: ->
+    @state = 'started'
+
+  finish: ->
+    @state = 'finished'
+
   join: (player2) ->
-    return { error: 'Game is not open' } unless isOpen()
     @player2 = player2
-    console.log "#{player2} Joined!"
+    @answers[@player2] = []
+    @state = 'started'
+    SS.publish.broadcast "game/#{@id}", { action: 'join', player: @player2 }
     return @
 
+  exit: (player) ->
+
   isOpen: ->
-    @player2?
+    @state == 'open'
+
+  answer: (player, questionId, answer) ->
+    return 'invalid' unless player == @player1 || player == @player2
+    #return 'invalid' unless @state == 'started'
+    return 'invalid' unless questionId == @answers[player].length
+
+    question = @questions[questionId]
+    if question.x == parseFloat(answer)
+      @answers[player][questionId] = 'correct'
+      SS.publish.broadcast "game/#{@id}", { action: 'answer', player: player, answer: 'correct' }
+      return 'correct'
+    else
+      @answers[player][questionId] = 'incorrect'
+      SS.publish.broadcast "game/#{@id}", { action: 'answer', player: player, answer: 'incorrect' }
+      return 'incorrect'
 
 
 exports.actions =
@@ -63,20 +89,17 @@ exports.actions =
     else
       cb { error: "No game with id '#{id}'" }
 
-  answer: (playerUserName, gameId, questionId, answer, cb) ->
-
-
-  createOrJoinGame: (playerUserName, cb) ->
-    player = Users[playerUserName]
-    unless player?
-      @login playerUserName, (user) ->
-        player = user
-
-    if player?
-      for game in Games
-        if game.isOpen()
-          game.join(player)
-          return cb(game)
-      return cb(new Game(player, 11, 19))
+  answer: (params, cb) ->
+    game = Games[params.gameId]
+    if game?
+      cb game.answer(params.user, params.questionId, params.answer)
     else
-      cb({ error: 'invalid player username' })
+      cb({ error: "Invalid game ID: #{params.gameId}" })
+
+  createOrJoinGame: (player, cb) ->
+    for own id, game of Games
+      if game.isOpen() && player != game.player1
+        game.join(player)
+        return cb(game)
+
+    return cb(new Game(player, 11, 19))
