@@ -1,48 +1,109 @@
 class GameView extends Backbone.View
   events:
     "click #confirm-button": "confirmAnswer"
+    "click .start.button": "playerStart"
 
   initialize: (options) ->
     $(window).bind "keypress", @handleKeyPress
 
     @user = options.user
     @game = options.gameData
-    @container = options.container
+    @$container = options.container
 
     @render()
 
-    @message = @.$("#message")
-    @answer = @.$("#answer")
-    @players = @.$("#players")
-    @timer = @.$("#timer")
-    @minutes = @.$("#timer .minutes")
-    @seconds = @.$("#timer .seconds")
-    @confirmButton = @.$("#confirm")
+    @$message = @.$("#message")
+    @$answer = @.$("#answer")
+    @$players = @.$("#players")
+    @$timer = @.$("#timer")
+    @$minutes = @.$("#timer .minutes")
+    @$seconds = @.$("#timer .seconds")
+    @$confirmButton = @.$("#confirm")
+    @$gameStates= @.$(".game-state")
+    @$open = @.$(".open")
+    @$ready = @.$(".ready")
+    @$started = @.$(".start")
+    @$finished = @.$(".finish")
+
     @currentQuestion = @game.answers[@user].length
     @question = @game.questions[@currentQuestion]
 
+    @totalTime = @game.duration
+    @elapsedTime = 0
+
     @renderQuestion()
     @renderPlayers()
+    @renderTimer()
 
     SS.events.on "game/#{@game.id}", (event) =>
-      console.debug "Event: #{event}"
-      if event.action == 'join'
-        @game.player2 = event.player
-        @players.append "<div style='clear:both' /><div id='#{@game.player2}'><p><span class='name'>#{@game.player2}</span>: <span class='points'>0 pts</span></p><div class='answers' /></div>"
-      else if event.action == 'answer' && event.player != @user
-        answers = @.$("##{event.player} .answers")
-        if event.answer == 'correct'
-          answers.append('<div class="response correct" />')
-        else
-          answers.append('<div class="response incorrect" />')
+      console.debug event
+      @[event.action](event)
+
+    @$gameStates.hide()
+    @.$(".#{@game.state}").show()
+
+    if @game.state == 'start'
+      @startTime = new Date(@game.startTime)
+      @startTimer()
+
+    if @game.state == 'finish'
+      @$minutes.html("00")
+      @$seconds.html("00")
+      @$timer.addClass('finished')
+
+    @state = @game.state
+
+  join: (o) ->
+    @game.player2 = o.player
+    @$players.append "<div style='clear:both' /><div id='#{@game.player2}'><p><span class='name'>#{@game.player2}</span>: <span class='points'>0 pts</span></p><div class='answers' /></div>"
+    @displayMessage("#{@game.player2} has joined!", "correct")
+
+  open: ->
+    @$gameStates.hide()
+    @$open.show()
+    @state = 'open'
+
+  ready: ->
+    @$gameStates.hide()
+    @$ready.show()
+    @state = 'ready'
+
+  start: (o) ->
+    @game.startTime = o.startTime unless @game.startTime?
+    @startTime = new Date(@game.startTime)
 
     @startTimer()
+    @$gameStates.hide()
+    @$started.show()
+    @state = 'start'
+
+  playerStart: ->
+    SS.server.app.playerStart { user: @user, gameId: @game.id }, (result) =>
+
+  playerFinish: ->
+    SS.server.app.playerFinish { user: @user, gameId: @game.id }, (result) =>
+
+  renderResults: (o) ->
+
+  finish: (o) ->
+    return if @state == 'finish'
+    @$gameStates.hide()
+    @$finished.show()
+    @state = 'finish'
+
+  answer: (o) ->
+    return if @user == o.player
+    answers = @.$("##{o.player} .answers")
+    if o.answer == 'correct'
+      answers.append('<div class="response correct" />')
+    else
+      answers.append('<div class="response incorrect" />')
 
   render: ->
     template = $("#game-template")
     $(@el).html template.html()
-    @container.html('')
-    @container.prepend(@el)
+    @$container.html('')
+    @$container.prepend(@el)
 
   renderTimer: ->
     remainingTime = @totalTime - @elapsedTime
@@ -53,19 +114,17 @@ class GameView extends Backbone.View
       remainingMinutes = "0" + remainingMinutes if remainingMinutes < 10
       remainingSeconds = "0" + remainingSeconds if remainingSeconds < 10
 
-      @minutes.html(remainingMinutes)
-      @seconds.html(remainingSeconds)
+      @$minutes.html(remainingMinutes)
+      @$seconds.html(remainingSeconds)
     else
-      @minutes.html("00")
-      @seconds.html("00")
-      @timer.addClass('finished')
+      @$minutes.html("00")
+      @$seconds.html("00")
+      @$timer.addClass('finished')
       clearInterval @timerInterval
-
+      @finish()
+      @playerFinish()
 
   startTimer: ->
-    @startTime = new Date(@game.startTime)
-    @totalTime = @game.duration
-    @elapsedTime = 0
     @timerInterval = setInterval @updateTimer, 250
     @updateTimer()
 
@@ -82,8 +141,8 @@ class GameView extends Backbone.View
     @b.html(@question.b)
 
   renderPlayers: ->
-    @players.html('')
-    @players.append "<div id='#{@game.player1}'><p><span class='name'>#{@game.player1}</span>: <span class='points'>0 pts</span></p><div class='answers' /></div>"
+    @$players.html('')
+    @$players.append "<div id='#{@game.player1}'><p><span class='name'>#{@game.player1}</span>: <span class='points'>0 pts</span></p><div class='answers' /></div>"
     player1Answers = @.$("##{@game.player1} .answers")
     for answer in @game.answers[@game.player1]
       if answer == 'correct'
@@ -92,7 +151,7 @@ class GameView extends Backbone.View
         player1Answers.append('<div class="response incorrect" />')
 
     if @game.player2?
-      @players.append "<div style='clear:both' /><div id='#{@game.player2}'><p><span class='name'>#{@game.player2}</span>: <span class='points'>0 pts</span></p><div class='answers' /></div>" if @game.player2?
+      @$players.append "<div style='clear:both' /><div id='#{@game.player2}'><p><span class='name'>#{@game.player2}</span>: <span class='points'>0 pts</span></p><div class='answers' /></div>" if @game.player2?
       player2Answers = @.$("##{@game.player2} .answers")
       for answer in @game.answers[@game.player2]
         if answer == 'correct'
@@ -108,26 +167,27 @@ class GameView extends Backbone.View
     @currentQuestion++
     @currentQuestion = 0 if @currentQuestion >= @game.questions.length
     @question = @game.questions[@currentQuestion]
-    @answer.val('')
+    @$answer.val('')
 
   confirmAnswer: =>
+    return unless @state == 'start'
     answers = @.$("##{@user} .answers")
-    if parseFloat(@answer.val()) == @question.x
+    if parseFloat(@$answer.val()) == @question.x
       @displayMessage('Correct!', 'correct')
       answers.append('<div class="response correct" />')
     else
       @displayMessage('Incorrect', 'incorrect')
       answers.append('<div class="response incorrect" />')
 
-    SS.server.app.answer { user: @user, gameId: @game.id, questionId: @currentQuestion, answer: @answer.val() }, (result) ->
+    SS.server.app.answer { user: @user, gameId: @game.id, questionId: @currentQuestion, answer: @$answer.val() }, (result) ->
 
     @advanceQuestion()
     @renderQuestion()
 
   displayMessage: (message, klass = "") ->
-    @message.html(message)
-    @message.attr('class', klass)
-    setTimeout (=> @message.addClass('hidden')), 3000
+    @$message.html(message)
+    @$message.attr('class', klass)
+    setTimeout (=> @$message.addClass('hidden')), 3000
 
 
 window.GameView = GameView

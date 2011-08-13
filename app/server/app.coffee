@@ -16,12 +16,18 @@ class Question
 class Game
   NUM_QUESTIONS: 50
 
-  constructor: (@player1, @min, @max) ->
+  constructor: (@player1, @min, @max, @duration) ->
     @id = NextGameId++
     @questions = new Array(@NUM_QUESTIONS)
     @player2 = null
     @answers = {}
     @answers[@player1] = []
+    @points = {}
+    @points[@player1] = 0
+    @started = {}
+    @started[@player1] = false
+    @finished = {}
+    @finished[@player1] = false
     @state = 'open'
 
     for i in [0...@NUM_QUESTIONS]
@@ -29,24 +35,42 @@ class Game
 
     Games[@id] = @
 
-    @startTimer(180) # This will eventually go somewhere else
+  playerStart: (player) ->
+    @started[player] = true
+    if @started[@player1] && @started[@player2]
+      @start()
+
+  playerFinish: (player) ->
+    @finished[player] = true
+    if @finished[@player1] && @finished[@player2]
+      @finish()
+
+  broadcast: (data) ->
+    SS.publish.broadcast "game/#{@id}", data
+
+  ready: ->
+    @state = 'ready'
+    @broadcast { action: 'ready' }
 
   start: ->
-    @state = 'started'
+    @state = 'start'
+    @startTimer(30)
+    @broadcast { action: 'start', startTime: @startTime }
 
   finish: ->
-    @state = 'finished'
+    @state = 'finish'
+    @broadcast { action: 'finish' }
 
   startTimer: (seconds) ->
     @startTime = new Date()
-    @duration = seconds
 
   join: (player2) ->
     @player2 = player2
     @answers[@player2] = []
-    @state = 'started'
-    SS.publish.broadcast "game/#{@id}", { action: 'join', player: @player2 }
-    return @
+    @points[@player2] = 0
+    @started[@player1] = false
+    @broadcast { action: 'join', player: @player2 }
+    @ready()
 
   exit: (player) ->
 
@@ -55,17 +79,17 @@ class Game
 
   answer: (player, questionId, answer) ->
     return 'invalid' unless player == @player1 || player == @player2
-    #return 'invalid' unless @state == 'started'
+    return 'invalid' unless @state == 'start'
     return 'invalid' unless questionId == @answers[player].length
 
     question = @questions[questionId]
     if question.x == parseFloat(answer)
       @answers[player][questionId] = 'correct'
-      SS.publish.broadcast "game/#{@id}", { action: 'answer', player: player, answer: 'correct' }
+      @broadcast { action: 'answer', player: player, answer: 'correct' }
       return 'correct'
     else
       @answers[player][questionId] = 'incorrect'
-      SS.publish.broadcast "game/#{@id}", { action: 'answer', player: player, answer: 'incorrect' }
+      @broadcast { action: 'answer', player: player, answer: 'incorrect' }
       return 'incorrect'
 
 
@@ -80,19 +104,22 @@ exports.actions =
     else
       return cb(new User(username))
 
-  sendMessage: (message, cb) ->
-    if message.length > 0
-      SS.publish.broadcast 'newMessage', message
-      cb true
-    else
-      cb false
-
   getGame: (id, cb) ->
     game = Games[id]
     if game?
       cb game
     else
       cb { error: "No game with id '#{id}'" }
+
+  playerStart: (params, cb) ->
+    game = Games[params.gameId]
+    if game?
+      game.playerStart params.user
+
+  playerFinish: (params, cb) ->
+    game = Games[params.gameId]
+    if game?
+      game.playerFinish params.user
 
   answer: (params, cb) ->
     game = Games[params.gameId]
@@ -107,4 +134,4 @@ exports.actions =
         game.join(player)
         return cb(game)
 
-    return cb(new Game(player, 11, 19))
+    return cb(new Game(player, 11, 19, 30))

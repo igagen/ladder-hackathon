@@ -1,10 +1,23 @@
 #game
+  -webkit-user-select none
+  -moz-user-select none
+
   h2
-    font-size 20px
+    font-size 30px
+    font-weight bold
     padding-bottom 20px
+
+  p.info
+    padding-bottom 15px
 
   input
     padding 0 10px
+
+  .game-state
+    display none
+
+  .game-state.active
+    display block
 
 #message
   text-align center
@@ -61,7 +74,6 @@
   font-size 35px
 
 #confirm-button
-  vertical-gradient(#0da5f4, #0a7cb8)
   top -6px
   font-size 20px
 
@@ -69,14 +81,18 @@
   top -5px
 
 .button
+  vertical-gradient(#0da5f4, #0a7cb8)
   position relative
+  padding 10px 15px
+  border-radius 5px
+  display inline-block
 
 .button:hover
   cursor pointer
   color white
 
 .button:active
-  top -1px
+  top 1px
 
 #players
   position absolute
