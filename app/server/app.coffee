@@ -85,11 +85,14 @@ class Game
     question = @questions[questionId]
     if question.x == parseFloat(answer)
       @answers[player][questionId] = 'correct'
-      @broadcast { action: 'answer', player: player, answer: 'correct' }
+      @points[player] += 10
+      @broadcast { action: 'answer', player: player, answer: 'correct', points: @points[player] }
       return 'correct'
     else
       @answers[player][questionId] = 'incorrect'
-      @broadcast { action: 'answer', player: player, answer: 'incorrect' }
+      @points[player] -= 10
+      @points[player] = 0 if @points[player] < 0
+      @broadcast { action: 'answer', player: player, answer: 'incorrect', points: @points[player] }
       return 'incorrect'
 
 
@@ -134,4 +137,4 @@ exports.actions =
         game.join(player)
         return cb(game)
 
-    return cb(new Game(player, 11, 19, 30))
+    return cb(new Game(player, 11, 19, 120))

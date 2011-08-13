@@ -24,6 +24,7 @@ class GameView extends Backbone.View
     @$ready = @.$(".ready")
     @$started = @.$(".start")
     @$finished = @.$(".finish")
+    @$result = @.$(".finish h2")
 
     @currentQuestion = @game.answers[@user].length
     @question = @game.questions[@currentQuestion]
@@ -50,6 +51,7 @@ class GameView extends Backbone.View
       @$minutes.html("00")
       @$seconds.html("00")
       @$timer.addClass('finished')
+      @renderResults()
 
     @state = @game.state
 
@@ -84,20 +86,31 @@ class GameView extends Backbone.View
     SS.server.app.playerFinish { user: @user, gameId: @game.id }, (result) =>
 
   renderResults: (o) ->
+    if @game.points[@game.player1] > @game.points[@game.player2]
+      @$result.html("#{@game.player1} wins!")
+    else if @game.points[@game.player2] > @game.points[@game.player1]
+      @$result.html("#{@game.player2} wins!")
+    else
+      @$result.html("Draw")
 
   finish: (o) ->
     return if @state == 'finish'
     @$gameStates.hide()
     @$finished.show()
     @state = 'finish'
+    @renderResults()
 
   answer: (o) ->
+    @game.points[o.player] = o.points
+    @.$("##{o.player} .points").html("#{o.points} pts")
+
     return if @user == o.player
     answers = @.$("##{o.player} .answers")
     if o.answer == 'correct'
       answers.append('<div class="response correct" />')
     else
       answers.append('<div class="response incorrect" />')
+
 
   render: ->
     template = $("#game-template")
