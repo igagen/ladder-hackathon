@@ -74,7 +74,7 @@ class GameView extends Backbone.View
 
   start: (o) ->
     @game.startTime = o.startTime unless @game.startTime?
-    @startTime = new Date(@game.startTime)
+    @game.startTime = @startTime = new Date()
 
     @startTimer()
     @$gameStates.hide()
@@ -117,7 +117,6 @@ class GameView extends Backbone.View
       answers.append('<div class="response correct" />')
     else
       answers.append('<div class="response incorrect" />')
-
 
   render: ->
     template = $("#game-template")
