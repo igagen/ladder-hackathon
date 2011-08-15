@@ -4,8 +4,50 @@ Games = {}
 Users = {}
 
 class User
-  constructor: (@username) ->
-    @id = NextUserId++
+  K: 24
+
+  constructor: (@username, cb) ->
+    key = "user:#{@username}:rating"
+    Users[@username] = @
+    R.get key, (error, data) =>
+      if data?
+        @rating = parseFloat(data)
+      else
+        @rating = 1000
+        @setRating(@rating)
+
+      cb(@)
+
+  getRating: ->
+    @rating
+
+  setRating: (rating) ->
+    @rating = rating
+    R.set "user:#{@username}:rating", @rating
+
+  # Update both players ratings based on match results
+  # sa, sb are the outcome values from this player's perspective (sa) and the opponents perspective (sb)
+  # If this player won, sa would be 1.0 and sb would be 0.0
+  # If the match was a draw, sa and sb would both be 0.5
+  updateRatings: (user2, sa, sb) ->
+    ra = @getRating()
+    rb = user2.getRating()
+
+    qa = Math.pow(10, ra / 400)
+    qb = Math.pow(10, rb / 400)
+
+    # Expected outcomes
+    ea = qa / (qa + qb)
+    eb = qb / (qa + qb)
+
+    # Calculate updated ratings
+    ra = Math.floor(ra + @K * (sa - ea))
+    rb = Math.floor(rb + @K * (sb - eb))
+
+    @setRating ra
+    console.log "Updated #{@username} rating to: #{ra}"
+    user2.setRating rb
+    console.log "Updated #{user2.username} rating to: #{rb}"
 
 class Question
   constructor: (min, max) ->
@@ -16,7 +58,7 @@ class Question
 class Game
   NUM_QUESTIONS: 50
 
-  constructor: (@player1, @min, @max, @duration) ->
+  constructor: (@player1, @min, @max, @duration, cb) ->
     @id = NextGameId++
     @questions = new Array(@NUM_QUESTIONS)
     @player2 = null
@@ -24,6 +66,7 @@ class Game
     @answers[@player1] = []
     @points = {}
     @points[@player1] = 0
+    @ratings = {}
     @started = {}
     @started[@player1] = false
     @finished = {}
@@ -34,6 +77,12 @@ class Game
       @questions[i] = new Question(@min, @max)
 
     Games[@id] = @
+
+    @users = {}
+    new User @player1, (user) =>
+      @users[@player1] = user
+      @ratings[@player1] = @users[@player1].getRating()
+      cb(@)
 
   playerStart: (player) ->
     @started[player] = true
@@ -57,9 +106,33 @@ class Game
     @startTimer(30)
     @broadcast { action: 'start', startTime: @startTime }
 
+  updateRatings: ->
+    if @points[@player1] > @points[@player2]
+      sa = 1
+      sb = 0
+    else if @points[@player1] < @points[@player2]
+      sa = 0
+      sb = 1
+    else
+      sa = 0.5
+      sb = 0.5
+
+    @users[@player1].updateRatings(@users[@player2], sa, sb)
+    @ratings[@player1] = @users[@player1].getRating()
+    @ratings[@player2] = @users[@player2].getRating()
+
   finish: ->
     @state = 'finish'
-    @broadcast { action: 'finish' }
+    data =
+      action: 'finish'
+      ratings: {}
+
+    @updateRatings()
+
+    data.ratings[@player1] = @users[@player1].getRating()
+    data.ratings[@player2] = @users[@player2].getRating()
+
+    @broadcast data
 
   startTimer: (seconds) ->
     @startTime = new Date()
@@ -69,8 +142,11 @@ class Game
     @answers[@player2] = []
     @points[@player2] = 0
     @started[@player1] = false
-    @broadcast { action: 'join', player: @player2 }
-    @ready()
+    new User @player2, (user) =>
+      @users[@player2] = user
+      @ratings[@player2] = user.getRating()
+      @broadcast { action: 'join', player: @users[@player2], rating: @ratings[@player2] }
+      @ready()
 
   exit: (player) ->
 
@@ -137,4 +213,5 @@ exports.actions =
         game.join(player)
         return cb(game)
 
-    return cb(new Game(player, 11, 19, 120))
+    new Game player, 3, 29, 30, (game) ->
+      cb(game)

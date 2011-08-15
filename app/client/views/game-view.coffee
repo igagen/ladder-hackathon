@@ -56,9 +56,10 @@ class GameView extends Backbone.View
     @state = @game.state
 
   join: (o) ->
-    @game.player2 = o.player
+    @game.player2 = o.player.username
     @game.points[@game.player2] = 0
-    @$players.append "<div style='clear:both' /><div id='#{@game.player2}'><p><span class='name'>#{@game.player2}</span>: <span class='points'>0 pts</span></p><div class='answers' /></div>"
+    @game.ratings[@game.player2] = o.rating
+    @renderPlayers()
     @displayMessage("#{@game.player2} has joined!", "correct")
 
   open: ->
@@ -94,12 +95,17 @@ class GameView extends Backbone.View
     else
       @$result.html("Draw")
 
+    if o?
+      @game.ratings[@game.player1] = o.ratings[@game.player1]
+      @game.ratings[@game.player2] = o.ratings[@game.player2]
+      @.$("##{@game.player1} .rating").html(o.ratings[@game.player1])
+      @.$("##{@game.player2} .rating").html(o.ratings[@game.player2])
+
   finish: (o) ->
-    return if @state == 'finish'
     @$gameStates.hide()
     @$finished.show()
     @state = 'finish'
-    @renderResults()
+    @renderResults(o)
 
   answer: (o) ->
     @game.points[o.player] = o.points
@@ -135,7 +141,6 @@ class GameView extends Backbone.View
       @$seconds.html("00")
       @$timer.addClass('finished')
       clearInterval @timerInterval
-      @finish()
       @playerFinish()
 
   startTimer: ->
@@ -156,7 +161,7 @@ class GameView extends Backbone.View
 
   renderPlayers: ->
     @$players.html('')
-    @$players.append "<div id='#{@game.player1}'><p><span class='name'>#{@game.player1}</span>: <span class='points'>0 pts</span></p><div class='answers' /></div>"
+    @$players.append "<div id='#{@game.player1}'><p><span class='name'>#{@game.player1}</span> (<span class='rating'>#{@game.ratings[@game.player1]}</span>): <span class='points'>0 pts</span></p><div class='answers' /></div>"
     player1Answers = @.$("##{@game.player1} .answers")
     for answer in @game.answers[@game.player1]
       if answer == 'correct'
@@ -165,13 +170,14 @@ class GameView extends Backbone.View
         player1Answers.append('<div class="response incorrect" />')
 
     if @game.player2?
-      @$players.append "<div style='clear:both' /><div id='#{@game.player2}'><p><span class='name'>#{@game.player2}</span>: <span class='points'>0 pts</span></p><div class='answers' /></div>" if @game.player2?
+      @$players.append "<div style='clear:both' /><div id='#{@game.player2}'><p><span class='name'>#{@game.player2}</span> (<span class='rating'>#{@game.ratings[@game.player2]}</span>): <span class='points'>0 pts</span></p><div class='answers' /></div>" if @game.player2?
       player2Answers = @.$("##{@game.player2} .answers")
-      for answer in @game.answers[@game.player2]
-        if answer == 'correct'
-          player2Answers.append('<div class="response correct" />')
-        else
-          player2Answers.append('<div class="response incorrect" />')
+      if @game.answers[@game.player2]?
+        for answer in @game.answers[@game.player2]
+          if answer == 'correct'
+            player2Answers.append('<div class="response correct" />')
+          else
+            player2Answers.append('<div class="response incorrect" />')
 
   handleKeyPress: (event) =>
     if event.keyCode == 13
