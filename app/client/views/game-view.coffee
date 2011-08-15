@@ -57,6 +57,7 @@ class GameView extends Backbone.View
 
   join: (o) ->
     @game.player2 = o.player
+    @game.points[@game.player2] = 0
     @$players.append "<div style='clear:both' /><div id='#{@game.player2}'><p><span class='name'>#{@game.player2}</span>: <span class='points'>0 pts</span></p><div class='answers' /></div>"
     @displayMessage("#{@game.player2} has joined!", "correct")
 
