@@ -2,7 +2,7 @@
 
 class GameView extends Backbone.View
   events:
-    "click #confirm-button": "confirmAnswer"
+    "click #advance-button": "handleAdvance"
     "click .start.button": "playerStart"
 
   initialize: (options) ->
@@ -20,7 +20,7 @@ class GameView extends Backbone.View
     @$timer = @.$("#timer")
     @$minutes = @.$("#timer .minutes")
     @$seconds = @.$("#timer .seconds")
-    @$confirmButton = @.$("#confirm")
+    @$advanceButton = @.$("#advance")
     @$gameStates= @.$(".game-state")
     @$open = @.$(".open")
     @$ready = @.$(".ready")
@@ -186,7 +186,7 @@ class GameView extends Backbone.View
 
   handleKeyPress: (event) =>
     if event.keyCode == 13
-      @confirmAnswer()
+      @handleAdvance()
 
   advanceQuestion: ->
     if @currentQuestion?
@@ -197,13 +197,16 @@ class GameView extends Backbone.View
     @question = @game.questions[@currentQuestion]
     @$answer.val('')
 
+  handleAdvance: =>
+    @confirmAnswer()
+
   confirmAnswer: =>
     return unless @state == 'start'
     answers = @.$("##{@user} .answers")
 
     # Convert fractions to floating point
     userChoice = @$answer.val()
-    parts = userChoice.split('/')
+    parts = _.map userChoice.split('/'), (s) -> s.trim()
     if parts.length == 2
       userChoice = parseFloat(parts[0]) / parseFloat(parts[1])
     else
