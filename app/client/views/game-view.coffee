@@ -20,13 +20,14 @@ class GameView extends Backbone.View
     @$timer = @.$("#timer")
     @$minutes = @.$("#timer .minutes")
     @$seconds = @.$("#timer .seconds")
-    @$advanceButton = @.$("#advance")
+    @$advanceButton = @.$("#advance-button")
     @$gameStates= @.$(".game-state")
     @$open = @.$(".open")
     @$ready = @.$(".ready")
     @$started = @.$(".start")
     @$finished = @.$(".finish")
     @$result = @.$(".finish h2")
+    @inExplanation = false
 
     @advanceQuestion() # load first question
     # @currentQuestion = @game.answers[@user].length
@@ -157,6 +158,7 @@ class GameView extends Backbone.View
 
   renderQuestion: ->
     @$explanation = @.$("#explanation")
+    @$explanation.hide()
     @$explanation.html(@question.explanation)
 
     @$stimulus = @.$("#stimulus")
@@ -198,9 +200,16 @@ class GameView extends Backbone.View
     @$answer.val('')
 
   handleAdvance: =>
-    @confirmAnswer()
+    if !@inExplanation
+      @showExplanation()
+      @inExplanation = true
+      @$advanceButton.val("Advance")
+    else
+      @continueToNextQuestion()
+      @inExplanation = false
+      @$advanceButton.val("Confirm")
 
-  confirmAnswer: =>
+  showExplanation: =>
     return unless @state == 'start'
     answers = @.$("##{@user} .answers")
 
@@ -218,7 +227,11 @@ class GameView extends Backbone.View
     else
       @displayMessage('Incorrect', 'incorrect')
       answers.append('<div class="response incorrect" />')
+    
+    @$explanation.show()
 
+  
+  continueToNextQuestion: =>
     SS.server.app.answer { user: @user, gameId: @game.id, questionId: @currentQuestion, answer: @$answer.val() }, (result) ->
 
     @advanceQuestion()
