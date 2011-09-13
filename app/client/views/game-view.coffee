@@ -28,8 +28,9 @@ class GameView extends Backbone.View
     @$finished = @.$(".finish")
     @$result = @.$(".finish h2")
 
-    @currentQuestion = @game.answers[@user].length
-    @question = @game.questions[@currentQuestion]
+    @advanceQuestion() # load first question
+    # @currentQuestion = @game.answers[@user].length
+    # @question = @game.questions[@currentQuestion]
 
     @totalTime = @game.duration
     @elapsedTime = 0
@@ -155,13 +156,12 @@ class GameView extends Backbone.View
     @renderTimer()
 
   renderQuestion: ->
-    # @a = @.$("#a")
-    # @a.html(@question.a)
-    # @b = @.$("#b")
-    # @b.html(@question.b)
     @$explanation = @.$("#explanation")
-    question = SS.shared.questions.get '0'
-    @$explanation.html(question.explanation)
+    @$explanation.html(@question.explanation)
+
+    @$stimulus = @.$("#stimulus")
+    @$stimulus.html(@question.stimulus)
+
     MathJax.Hub.Typeset()
 
   renderPlayers: ->
@@ -189,7 +189,10 @@ class GameView extends Backbone.View
       @confirmAnswer()
 
   advanceQuestion: ->
-    @currentQuestion++
+    if @currentQuestion?
+      @currentQuestion++
+    else
+      @currentQuestion = 0
     @currentQuestion = 0 if @currentQuestion >= @game.questions.length
     @question = @game.questions[@currentQuestion]
     @$answer.val('')
@@ -197,7 +200,16 @@ class GameView extends Backbone.View
   confirmAnswer: =>
     return unless @state == 'start'
     answers = @.$("##{@user} .answers")
-    if parseFloat(@$answer.val()) == @question.x
+
+    # Convert fractions to floating point
+    userChoice = @$answer.val()
+    parts = userChoice.split('/')
+    if parts.length == 2
+      userChoice = parseFloat(parts[0]) / parseFloat(parts[1])
+    else
+      userChoice = parseFloat(parts[0])
+
+    if userChoice == @question.correctAnswer
       @displayMessage('Correct!', 'correct')
       answers.append('<div class="response correct" />')
     else

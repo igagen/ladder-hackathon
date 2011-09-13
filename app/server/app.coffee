@@ -2,7 +2,6 @@ NextGameId = 0
 NextUserId = 0
 Games = {}
 Users = {}
-{Questions} = require './questions'
 
 class User
   K: 24
@@ -75,7 +74,7 @@ class Game
     @state = 'open'
 
     for i in [0...@NUM_QUESTIONS]
-      @questions[i] = new Question(@min, @max)
+      @questions[i] = SS.shared.questions.get(i)
 
     Games[@id] = @
 
@@ -84,6 +83,8 @@ class Game
       @users[@player1] = user
       @ratings[@player1] = @users[@player1].getRating()
       cb(@)
+    
+    @start()
 
   playerStart: (player) ->
     @started[player] = true
@@ -190,9 +191,6 @@ exports.actions =
       cb game
     else
       cb { error: "No game with id '#{id}'" }
-
-  question: (id, cb) ->
-    cb(Questions[id])
 
   playerStart: (params, cb) ->
     game = Games[params.gameId]

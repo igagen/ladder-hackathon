@@ -23,7 +23,7 @@
   text-align center
   margin 0 auto 15px
   width 250px
-  padding 15px
+  padding 15
   font-size 18px
   opacity 1
   border-radius 5px
@@ -47,35 +47,38 @@
 #message.hidden
   opacity 0
 
-#question
-  position relative
-  padding 25px
-  font-size 35px
-  margin 0 auto
-  width 500px
-  border-radius 5px
-  border 1px solid #ccc
-
-  span, input
-    padding 10px
+#response
+  float right
+  font-size 25px
 
   input
-    border 1px solid #888
+    display block
+    border 1px solid #333
     border-radius 3px
     padding 10px
-    margin 10px
-
+    margin 20px 10px
+ 
   input[type='text']
     border none
-    background-color #ddd
-    width 150px
-
-#answer
-  font-size 35px
+    background-color #ccc
 
 #confirm-button
   top -6px
   font-size 20px
+  width 150px
+
+#answer
+  width 130px
+  font-size 35px
+
+#stimulus, #explanation
+  width 400px
+  margin 10px
+  padding 10px
+
+#explanation
+  border 1px solid #ccc
+  background-color #fffae3
 
 #confirm-button:active
   top -5px
@@ -143,3 +146,5 @@ a.button:hover
 .incorrect
   vertical-gradient(#ff0000, #9c0000)
 
+#message
+  padding 10px

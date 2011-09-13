@@ -1,8 +1,4 @@
-
-
 #game
-
-
   #message.hidden ...
 
   #timer <span class="minutes">01</span>:<span class="seconds">00</span>
@@ -25,11 +21,13 @@
     .game-state.start
       h2 Go!
       p.info Answer The Most Questions Correctly Before Time Runs Out!<br>You will be penalized for answering incorrectly.
-      p#explanation
 
-      #question
+      #response
         input#answer(type = "text")
         input#confirm-button.button(type = "submit", value="Confirm")
+
+      p#stimulus
+      p#explanation
 
     .game-state.finish
       h2 Game Over!
