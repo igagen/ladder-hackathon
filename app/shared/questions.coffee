@@ -1,4 +1,7 @@
-exports.Questions =
+exports.get = (id) ->
+    Questions[id]
+
+Questions =
   '0':
     explanation: '''
       $$a = {b \\over 3}$$

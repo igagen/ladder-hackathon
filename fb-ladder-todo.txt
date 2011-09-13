@@ -1,0 +1,11 @@
+Major tasks:
+	solo game
+	mine SAT questions for content
+	figure out way to template questions
+	progression from easy to hard
+	ladder mechanics
+		- lobby
+		- matching players of similar rank
+		- dividing into leagues?
+	exit/disconnect/cleanup
+	FB integration\

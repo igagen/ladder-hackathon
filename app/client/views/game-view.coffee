@@ -160,9 +160,9 @@ class GameView extends Backbone.View
     # @b = @.$("#b")
     # @b.html(@question.b)
     @$explanation = @.$("#explanation")
-    SS.server.app.question '0', (question) =>
-      @$explanation.html(question.explanation)
-      MathJax.Hub.Typeset()
+    question = SS.shared.questions.get '0'
+    @$explanation.html(question.explanation)
+    MathJax.Hub.Typeset()
 
   renderPlayers: ->
     @$players.html('')
