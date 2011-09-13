@@ -1,7 +1,11 @@
 !!! 5
 html(lang="en")
   head
+    // IMPORTANT: put JS files before SocketStream, or maybe figure out asset management.
+    script(type="text/javascript", src="https://d3eoax9i5htok0.cloudfront.net/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML")
     != SocketStream
+
+
     title Ladder
   body
     #content

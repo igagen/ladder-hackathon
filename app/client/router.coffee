@@ -8,6 +8,7 @@ class Router extends Backbone.Router
     @loadUser()
     SS.server.app.getGame id, (gameData) =>
       new GameView { user: @user, gameData: gameData, container: $("#content") }
+      # MathJax.Hub.Typeset();
 
   createOrJoinGame: ->
     @loadUser()

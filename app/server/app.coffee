@@ -2,6 +2,7 @@ NextGameId = 0
 NextUserId = 0
 Games = {}
 Users = {}
+{Questions} = require './questions'
 
 class User
   K: 24
@@ -103,7 +104,7 @@ class Game
 
   start: ->
     @state = 'start'
-    @startTimer(30)
+    @startTimer(180)
     @broadcast { action: 'start', startTime: @startTime }
 
   updateRatings: ->
@@ -190,6 +191,9 @@ exports.actions =
     else
       cb { error: "No game with id '#{id}'" }
 
+  question: (id, cb) ->
+    cb(Questions[id])
+
   playerStart: (params, cb) ->
     game = Games[params.gameId]
     if game?
@@ -213,5 +217,5 @@ exports.actions =
         game.join(player)
         return cb(game)
 
-    new Game player, 3, 29, 30, (game) ->
+    new Game player, 3, 29, 180, (game) ->
       cb(game)

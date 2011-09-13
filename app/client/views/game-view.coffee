@@ -1,3 +1,5 @@
+
+
 class GameView extends Backbone.View
   events:
     "click #confirm-button": "confirmAnswer"
@@ -153,10 +155,14 @@ class GameView extends Backbone.View
     @renderTimer()
 
   renderQuestion: ->
-    @a = @.$("#a")
-    @a.html(@question.a)
-    @b = @.$("#b")
-    @b.html(@question.b)
+    # @a = @.$("#a")
+    # @a.html(@question.a)
+    # @b = @.$("#b")
+    # @b.html(@question.b)
+    @$explanation = @.$("#explanation")
+    SS.server.app.question '0', (question) =>
+      @$explanation.html(question.explanation)
+      MathJax.Hub.Typeset()
 
   renderPlayers: ->
     @$players.html('')
