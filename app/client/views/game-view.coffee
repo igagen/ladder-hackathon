@@ -202,6 +202,7 @@ class GameView extends Backbone.View
   handleAdvance: =>
     if !@inExplanation
       @showExplanation()
+      @confirmAnswer()
       @inExplanation = true
       @$advanceButton.val("Advance")
     else
@@ -225,10 +226,10 @@ class GameView extends Backbone.View
     
     @$explanation.show()
 
-  
-  continueToNextQuestion: =>
+  confirmAnswer: =>
     SS.server.app.answer { user: @user, gameId: @game.id, questionId: @currentQuestion, answer: @$answer.val() }, (result) ->
 
+  continueToNextQuestion: =>
     @advanceQuestion()
     @renderQuestion()
 
