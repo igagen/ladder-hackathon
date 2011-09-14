@@ -6,9 +6,10 @@ Major tasks:
     with Grockit
 
   GAME:
-    resurrect multi-player
     ladder mechanics
       - lobby
+        - list all games
+        - live update
       - matching players of similar rank
       - dividing into leagues?
     exit/disconnect/cleanup
