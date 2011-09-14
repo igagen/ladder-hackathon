@@ -58,7 +58,7 @@ class Question
 class Game
   NUM_QUESTIONS: 50
 
-  constructor: (@player1, @min, @max, @duration, cb) ->
+  constructor: (@player1, @min, @max, @duration, @solo, cb) ->
     @id = NextGameId++
     @questions = new Array(@NUM_QUESTIONS)
     @player2 = null
@@ -84,7 +84,7 @@ class Game
       @ratings[@player1] = @users[@player1].getRating()
       cb(@)
     
-    @start()
+    @start() if @solo
 
   playerStart: (player) ->
     @started[player] = true
@@ -209,11 +209,18 @@ exports.actions =
     else
       cb({ error: "Invalid game ID: #{params.gameId}" })
 
-  createOrJoinGame: (player, cb) ->
+  createSoloGame: (player, cb) ->
+    new Game player, 3, 29, 180, true, (game) ->
+      cb(game)
+
+  createTwoPlayerGame: (player, cb) ->
+    new Game player, 3, 29, 180, false, (game) ->
+      cb(game)
+
+  joinGame: (player, cb) ->
+    # BROKEN FOR THE MOMENT
     for own id, game of Games
       if game.isOpen() && player != game.player1
         game.join(player)
         return cb(game)
 
-    new Game player, 3, 29, 180, (game) ->
-      cb(game)

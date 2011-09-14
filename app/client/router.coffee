@@ -2,23 +2,30 @@ class Router extends Backbone.Router
   routes:
     "": "lobby"
     "/": "lobby"
-    "/create_or_join": "createOrJoin"
-    "/game/:id": "game"
+    "/solo": "solo"
+    "/multi/:id": "multi"
     "/lobby": "lobby"
-
-  game: (id) ->
-    @loadUser()
-    SS.server.app.getGame id, (gameData) =>
-      new GameView { user: @user, gameData: gameData, container: $("#content") }
 
   lobby: ->
     @loadUser()
     new LobbyView { user: @user, container: $("#content") }
 
-  createOrJoin: ->
+  solo: ->
     @loadUser()
-    SS.server.app.createOrJoinGame @user, (gameData) =>
-      window.location.hash = "#/game/#{gameData.id}"
+    SS.server.app.createSoloGame @user, (gameData) =>
+      @game(gameData)
+
+  multi: (id) ->
+    @loadUser()
+    if id == "new" 
+      SS.server.app.createTwoPlayerGame @user, (gameData) =>
+        @game(gameData)
+    else
+      SS.server.app.getGame id, (gameData) =>
+        @game(gameData)
+
+  game: (gameData) ->
+    new GameView { user: @user, gameData: gameData, container: $("#content") }
 
   loadUser: ->
     user = localStorage.getItem 'user'
