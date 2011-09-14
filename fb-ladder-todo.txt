@@ -1,34 +1,38 @@
 Major tasks:
-	mine SAT questions for content
-	figure out way to template questions
 
-	question loader: progression from easy to hard
 
-	FB integration\
+  INTEGRATION:
+    with Facebook
+    with Grockit
 
-	resurrect multi-player
-	ladder mechanics
-		- lobby
-		- matching players of similar rank
-		- dividing into leagues?
-	exit/disconnect/cleanup
+  GAME:
+    resurrect multi-player
+    ladder mechanics
+      - lobby
+      - matching players of similar rank
+      - dividing into leagues?
+    exit/disconnect/cleanup
+
+  CONTENT:
+    question loader: progression from easy to hard
+    figure out way to template questions
 
 
 Game Design Goals:
-	SOLO
-		good for dev
-		good for non-competitive people wanting practice (climb the ladder)
-		track progress, but not vs. others
-	MULTI
-		competitive
-		fun
+  SOLO
+    good for dev
+    good for non-competitive people wanting practice (climb the ladder)
+    track progress, but not vs. others
+  MULTI
+    competitive
+    fun
 
 
 
-	person has questions to answer if no other players (either before or after)
-	once two players get matched up, the race begins
-		OR
-	once N players get matched up, the race begins
-		OR
-	you're always racing everybody
-	
+  person has questions to answer if no other players (either before or after)
+  once two players get matched up, the race begins
+    OR
+  once N players get matched up, the race begins
+    OR
+  you're always racing everybody
+  

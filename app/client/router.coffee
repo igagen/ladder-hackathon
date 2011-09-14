@@ -1,16 +1,21 @@
 class Router extends Backbone.Router
   routes:
-    "": "createOrJoinGame"
-    "/": "createOrJoinGame"
+    "": "lobby"
+    "/": "lobby"
+    "/create_or_join": "createOrJoin"
     "/game/:id": "game"
+    "/lobby": "lobby"
 
   game: (id) ->
     @loadUser()
     SS.server.app.getGame id, (gameData) =>
       new GameView { user: @user, gameData: gameData, container: $("#content") }
-      # MathJax.Hub.Typeset();
 
-  createOrJoinGame: ->
+  lobby: ->
+    @loadUser()
+    new LobbyView { user: @user, container: $("#content") }
+
+  createOrJoin: ->
     @loadUser()
     SS.server.app.createOrJoinGame @user, (gameData) =>
       window.location.hash = "#/game/#{gameData.id}"
