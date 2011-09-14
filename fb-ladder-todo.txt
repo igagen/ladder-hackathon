@@ -17,6 +17,8 @@ Major tasks:
     question loader: progression from easy to hard
     figure out way to template questions
 
+  DEPLOY:
+    upgrade socketstream
 
 Game Design Goals:
   SOLO

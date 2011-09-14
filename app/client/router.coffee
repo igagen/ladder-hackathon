@@ -20,6 +20,9 @@ class Router extends Backbone.Router
     if id == "new" 
       SS.server.app.createTwoPlayerGame @user, (gameData) =>
         @game(gameData)
+    else if id == "join" 
+      SS.server.app.joinTwoPlayerGame @user, (gameData) =>
+        @game(gameData)
     else
       SS.server.app.getGame id, (gameData) =>
         @game(gameData)

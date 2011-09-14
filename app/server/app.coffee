@@ -217,10 +217,10 @@ exports.actions =
     new Game player, 3, 29, 180, false, (game) ->
       cb(game)
 
-  joinGame: (player, cb) ->
-    # BROKEN FOR THE MOMENT
+  joinTwoPlayerGame: (player, cb) ->
     for own id, game of Games
       if game.isOpen() && player != game.player1
         game.join(player)
         return cb(game)
-
+    # in case no players available, fall back to createTwoPlayerGame
+    @createTwoPlayerGame(player, cb)
