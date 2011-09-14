@@ -1,5 +1,4 @@
 Major tasks:
-	refine current question
 	mine SAT questions for content
 	figure out way to template questions
 

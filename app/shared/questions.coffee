@@ -4,6 +4,34 @@ exports.get = (index) ->
 Questions = [
   {
     stimulus: '''
+      The first two terms of a sequence are a and 4a, and each term after the first is 4 times the preceding term. If the sum of the first 4 terms of the sequence is 510, what is the value of a?
+      '''
+    explanation: '''
+      Since each term is 4 times the preceding term, the first four terms of this sequence are a, 4a, 16a, and 64a. The sum of these four terms is 85a. We're told that the first four terms add to 510, so we know that 85a = 510, which means:
+      $$a = {510 \\over 85} = 6$$
+      '''
+    correctAnswer: 6
+  },
+
+  {
+    stimulus: '''If \\( f(x) = 15 + {x^2 \\over 9} \\) and \\( f(3k) = 8k \\), what is the least possible value for \\(k\\)?'''
+    explanation: '''
+      Substituting \\(3k\\) for \\(x\\), we get that \\(f(3k) = 15 + {(3k)^2 \\over 9}\\). We're also told that \\(f(3k) = 8k\\), so we can set the two expressions equal.
+      
+      $$15 + {(3k)^2 \\over 9} = 8k$$
+      $$15 + {9k^2 \\over 9} = 8k$$
+      $$15 + k^2 = 8k$$
+      $$k^2 - 8k + 15 = 0$$
+      $$(k - 5)(k - 3) = 0$$
+      $$k = {5, 3}$$
+
+      So the two possible values for \\(k\\) are 3 and 5, and thus 3 is the least possible solution.
+    '''
+    correctAnswer: 3
+  },
+
+  {
+    stimulus: '''
       For the system of values above, all terms are non-zero. 
 
       $$a = {b \\over 3}$$
@@ -31,4 +59,5 @@ Questions = [
       '''
     correctAnswer: 0.2
   }
+
 ]
