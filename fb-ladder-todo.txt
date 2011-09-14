@@ -8,16 +8,19 @@ Major tasks:
   GAME:
     lobby
       - styling
-  
-    exit/disconnect/cleanup
-      - shorten timer for testing
-      - watch for console errors
-      - clean up data
-
+      - live update games
       - leaderboard
         - show in lobby
         - live update
+  
+    exit/disconnect/cleanup
+      - exiting
+        - unsubscribe
+        - count win/loss
+        - clean up game?
+
       - update lobby
+      - put timer back
 
     ladder mechanics
       - matching players of similar rank
