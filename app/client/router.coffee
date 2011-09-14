@@ -4,6 +4,7 @@ class Router extends Backbone.Router
     "/": "lobby"
     "/solo": "solo"
     "/multi/:id": "multi"
+    "/game/:id": "joinGame"
     "/lobby": "lobby"
 
   lobby: ->
@@ -21,14 +22,17 @@ class Router extends Backbone.Router
       SS.server.app.createTwoPlayerGame @user, (gameData) =>
         @game(gameData)
     else if id == "join" 
-      SS.server.app.joinTwoPlayerGame @user, (gameData) =>
-        @game(gameData)
-    else
-      SS.server.app.getGame id, (gameData) =>
+      SS.server.app.autoJoinTwoPlayerGame @user, (gameData) =>
         @game(gameData)
 
   game: (gameData) ->
+    @loadUser()
     new GameView { user: @user, gameData: gameData, container: $("#content") }
+
+  joinGame: (id) ->
+    @loadUser()
+    SS.server.app.joinSpecificTwoPlayerGame {id: id, user: @user}, (gameData) =>
+      @game(gameData)
 
   loadUser: ->
     user = localStorage.getItem 'user'

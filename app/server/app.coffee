@@ -86,6 +86,11 @@ class Game
     
     @start() if @solo
 
+  lobbyData: ->
+    id: @id
+    state: @state
+    solo: @solo
+
   playerStart: (player) ->
     @started[player] = true
     if @started[@player1] && @started[@player2]
@@ -155,6 +160,9 @@ class Game
   isOpen: ->
     @state == 'open'
 
+  isOpenForMe: (player) ->
+    @isOpen() && player != @player1
+
   answer: (player, questionId, userChoice) ->
     return 'invalid' unless player == @player1 || player == @player2
     return 'invalid' unless @state == 'start'
@@ -192,6 +200,10 @@ exports.actions =
     else
       cb { error: "No game with id '#{id}'" }
 
+  getOpenTwoPlayerGames: (cb) ->
+    gameData = (game.lobbyData() for id, game of Games when game.isOpen())
+    cb(gameData)
+
   playerStart: (params, cb) ->
     game = Games[params.gameId]
     if game?
@@ -217,9 +229,18 @@ exports.actions =
     new Game player, 3, 29, 180, false, (game) ->
       cb(game)
 
-  joinTwoPlayerGame: (player, cb) ->
+  joinSpecificTwoPlayerGame: (params, cb) ->
+    game = Games[params.id]
+    if game.isOpenForMe(params.user)
+      game.join(params.user)
+      cb(game)
+    else
+      # in case no players available, fall back to createTwoPlayerGame
+      @createTwoPlayerGame(params.user, cb)
+
+  autoJoinTwoPlayerGame: (player, cb) ->
     for own id, game of Games
-      if game.isOpen() && player != game.player1
+      if game.isOpenForMe(player)
         game.join(player)
         return cb(game)
     # in case no players available, fall back to createTwoPlayerGame

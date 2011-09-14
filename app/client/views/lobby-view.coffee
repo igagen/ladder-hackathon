@@ -13,5 +13,15 @@ class LobbyView extends Backbone.View
     @$container.html('')
     @$container.prepend(@el)
 
+    @$gamesElem = @.$("#games")
+
+    SS.server.app.getOpenTwoPlayerGames (games) =>
+      for gameData in games
+        @$gamesElem.append("""
+          <div class='game'>
+          <h2>#{gameData.state}</h2>
+          <a href='/#/game/#{gameData.id}'>Join Game</a>
+          </div>
+          """)
 
 window.LobbyView = LobbyView

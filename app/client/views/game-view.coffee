@@ -1,5 +1,3 @@
-
-
 class GameView extends Backbone.View
   events:
     "click #advance-button": "handleAdvance"

@@ -13,6 +13,8 @@ Major tasks:
       - matching players of similar rank
       - dividing into leagues?
     exit/disconnect/cleanup
+      - shorten timer for testing
+      - watch for console errors
 
   CONTENT:
     question loader: progression from easy to hard
@@ -21,21 +23,3 @@ Major tasks:
   DEPLOY:
     upgrade socketstream
 
-Game Design Goals:
-  SOLO
-    good for dev
-    good for non-competitive people wanting practice (climb the ladder)
-    track progress, but not vs. others
-  MULTI
-    competitive
-    fun
-
-
-
-  person has questions to answer if no other players (either before or after)
-  once two players get matched up, the race begins
-    OR
-  once N players get matched up, the race begins
-    OR
-  you're always racing everybody
-  
