@@ -38,9 +38,10 @@ class GameView extends Backbone.View
     @renderPlayers()
     @renderTimer()
 
-    SS.events.on "game/#{@game.id}", (event) =>
-      console.debug event
-      @[event.action](event)
+    SS.events.on "info", (message, channel) =>
+      console.debug channel
+      console.debug message
+      @[message.action](message)
 
     @$gameStates.hide()
     @.$(".#{@game.state}").show()

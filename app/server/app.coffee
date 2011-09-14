@@ -101,17 +101,17 @@ class Game
     if @finished[@player1] && @finished[@player2]
       @finish()
 
-  broadcast: (data) ->
-    SS.publish.broadcast "game/#{@id}", data
+  publish: (data) ->
+    SS.publish.channel "game/#{@id}", "info", data
 
   ready: ->
     @state = 'ready'
-    @broadcast { action: 'ready' }
+    @publish { action: 'ready' }
 
   start: ->
     @state = 'start'
-    @startTimer(180)
-    @broadcast { action: 'start', startTime: @startTime }
+    @startTimer()
+    @publish { action: 'start', startTime: @startTime }
 
   updateRatings: ->
     if @points[@player1] > @points[@player2]
@@ -139,9 +139,9 @@ class Game
     data.ratings[@player1] = @users[@player1].getRating()
     data.ratings[@player2] = @users[@player2].getRating()
 
-    @broadcast data
+    @publish data
 
-  startTimer: (seconds) ->
+  startTimer: () ->
     @startTime = new Date()
 
   join: (player2) ->
@@ -152,7 +152,7 @@ class Game
     new User @player2, (user) =>
       @users[@player2] = user
       @ratings[@player2] = user.getRating()
-      @broadcast { action: 'join', player: @users[@player2], rating: @ratings[@player2] }
+      @publish { action: 'join', player: @users[@player2], rating: @ratings[@player2] }
       @ready()
 
   exit: (player) ->
@@ -172,13 +172,13 @@ class Game
     if SS.shared.questions.isCorrect(userChoice, question)
       @answers[player][questionId] = 'correct'
       @points[player] += 10
-      @broadcast { action: 'answer', player: player, answer: 'correct', points: @points[player] }
+      @publish { action: 'answer', player: player, answer: 'correct', points: @points[player] }
       return 'correct'
     else
       @answers[player][questionId] = 'incorrect'
       @points[player] -= 10
       @points[player] = 0 if @points[player] < 0
-      @broadcast { action: 'answer', player: player, answer: 'incorrect', points: @points[player] }
+      @publish { action: 'answer', player: player, answer: 'incorrect', points: @points[player] }
       return 'incorrect'
 
 
@@ -222,16 +222,19 @@ exports.actions =
       cb({ error: "Invalid game ID: #{params.gameId}" })
 
   createSoloGame: (player, cb) ->
-    new Game player, 3, 29, 180, true, (game) ->
+    new Game player, 3, 29, 30, true, (game) =>
+      @session.channel.subscribe("game/#{game.id}")
       cb(game)
 
   createTwoPlayerGame: (player, cb) ->
-    new Game player, 3, 29, 180, false, (game) ->
+    new Game player, 3, 29, 30, false, (game) =>
+      @session.channel.subscribe("game/#{game.id}")
       cb(game)
 
   joinSpecificTwoPlayerGame: (params, cb) ->
     game = Games[params.id]
     if game.isOpenForMe(params.user)
+      @session.channel.subscribe("game/#{game.id}")
       game.join(params.user)
       cb(game)
     else
@@ -241,6 +244,7 @@ exports.actions =
   autoJoinTwoPlayerGame: (player, cb) ->
     for own id, game of Games
       if game.isOpenForMe(player)
+        @session.channel.subscribe("game/#{game.id}")
         game.join(player)
         return cb(game)
     # in case no players available, fall back to createTwoPlayerGame

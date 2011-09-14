@@ -1,7 +1,5 @@
 class LobbyView extends Backbone.View
   initialize: (options) ->
-    $(window).bind "keypress", @handleKeyPress
-
     @user = options.user
     @$container = options.container
 

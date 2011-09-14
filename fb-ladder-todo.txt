@@ -6,15 +6,25 @@ Major tasks:
     with Grockit
 
   GAME:
-    ladder mechanics
-      - lobby
-        - list all games
-        - live update
-      - matching players of similar rank
-      - dividing into leagues?
+    lobby
+      - styling
+  
     exit/disconnect/cleanup
       - shorten timer for testing
       - watch for console errors
+      - clean up data
+
+      - leaderboard
+        - show in lobby
+        - live update
+      - update lobby
+
+    ladder mechanics
+      - matching players of similar rank
+      - dividing into leagues?
+
+    client-side templating
+
 
   CONTENT:
     question loader: progression from easy to hard
@@ -22,4 +32,4 @@ Major tasks:
 
   DEPLOY:
     upgrade socketstream
-
+    finish event looping infinitely

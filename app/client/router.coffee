@@ -18,7 +18,7 @@ class Router extends Backbone.Router
 
   multi: (id) ->
     @loadUser()
-    if id == "new" 
+    if id == "new"
       SS.server.app.createTwoPlayerGame @user, (gameData) =>
         @game(gameData)
     else if id == "join" 
