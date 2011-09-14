@@ -215,13 +215,8 @@ class GameView extends Backbone.View
 
     # Convert fractions to floating point
     userChoice = @$answer.val()
-    parts = _.map userChoice.split('/'), (s) -> s.trim()
-    if parts.length == 2
-      userChoice = parseFloat(parts[0]) / parseFloat(parts[1])
-    else
-      userChoice = parseFloat(parts[0])
 
-    if userChoice == @question.correctAnswer
+    if SS.shared.questions.isCorrect(userChoice, @question)
       @displayMessage('Correct!', 'correct')
       answers.append('<div class="response correct" />')
     else

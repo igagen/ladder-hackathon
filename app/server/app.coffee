@@ -155,13 +155,13 @@ class Game
   isOpen: ->
     @state == 'open'
 
-  answer: (player, questionId, answer) ->
+  answer: (player, questionId, userChoice) ->
     return 'invalid' unless player == @player1 || player == @player2
     return 'invalid' unless @state == 'start'
     return 'invalid' unless questionId == @answers[player].length
 
     question = @questions[questionId]
-    if question.x == parseFloat(answer)
+    if SS.shared.questions.isCorrect(userChoice, question)
       @answers[player][questionId] = 'correct'
       @points[player] += 10
       @broadcast { action: 'answer', player: player, answer: 'correct', points: @points[player] }
