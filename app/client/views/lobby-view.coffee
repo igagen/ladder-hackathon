@@ -22,4 +22,5 @@ class LobbyView extends Backbone.View
           </div>
           """)
 
+
 window.LobbyView = LobbyView

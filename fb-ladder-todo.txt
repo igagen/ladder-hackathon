@@ -2,17 +2,21 @@ Major tasks:
 
 
   INTEGRATION:
-    with Facebook
     with Grockit
 
   GAME:
     lobby
+      - who's playing
       - styling
       - live update games
-      - leaderboard
-        - show in lobby
-        - live update
-  
+
+    refresh
+      - hash tags
+      - verify answer bars, etc.
+
+    FB integration
+      - use FB login and username
+
     exit/disconnect/cleanup
       - exiting
         - unsubscribe
@@ -25,6 +29,7 @@ Major tasks:
     ladder mechanics
       - matching players of similar rank
       - dividing into leagues?
+      - show leaderboard on lobby
 
     client-side templating
 
@@ -35,4 +40,8 @@ Major tasks:
 
   DEPLOY:
     upgrade socketstream
+    ssl
     finish event looping infinitely
+
+  ISSUES:
+    fix points
