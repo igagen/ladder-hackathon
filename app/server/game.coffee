@@ -1,21 +1,39 @@
 GameStore = require("./store").get("Game")
 {User} = require("./user")
 
+class Player
+  constructor: (@userId) ->
+    @points = 0
+    @started = false
+    @finished = false
+    @answers = []
+
+  answer: (correct) ->
+    @answers.push(correct)
+    if correct
+      @points += 10
+    else
+      @points -= 10
+      @points = 0 if @points < 0
+    @points
+  
+  playerData: ->
+    userId: @userId
+    answers: @answers
+    points: @points
+
 exports.Game = class Game
   NUM_QUESTIONS: 50
 
-  constructor: (@player1, @min, @max, @duration, @solo, cb) ->
+  constructor: (@userId1, @min, @max, @duration, @solo, cb) ->
     @questions = new Array(@NUM_QUESTIONS)
-    @player2 = null
-    @answers = {}
-    @answers[@player1] = []
-    @points = {}
-    @points[@player1] = 0
+    
     @ratings = {}
-    @started = {}
-    @started[@player1] = false
-    @finished = {}
-    @finished[@player1] = false
+
+    @player1 = new Player(@userId1)
+    @players = {}
+    @players[@userId1] = @player1
+
     @state = 'open'
 
     for i in [0...@NUM_QUESTIONS]
@@ -23,27 +41,34 @@ exports.Game = class Game
 
     @id = GameStore.save(@)
 
-    @users = {}
-    new User @player1, (user) =>
-      @users[@player1] = user
-      @ratings[@player1] = @users[@player1].getRating()
-      cb(@)
-    
     @start() if @solo
+
+    cb(@)
 
   lobbyData: ->
     id: @id
     state: @state
     solo: @solo
 
-  playerStart: (player) ->
-    @started[player] = true
-    if @started[@player1] && @started[@player2]
+  gameData: ->
+    id: @id
+    duration: @duration
+    state: @state
+    questions: @questions
+    player1: @player1.playerData()
+    player2: @player2?.playerData()
+
+  playerStart: (userId) ->
+    player = @players[userId]
+    player.started = true
+    if @player1.started && @player2.started
       @start()
 
-  playerFinish: (player) ->
-    @finished[player] = true
-    if @finished[@player1] && @finished[@player2]
+  playerFinish: (userId) ->
+    player = @players[userId]
+    player.finished = true
+    # WRONG
+    if @player1.finished && @player2.finished
       @finish()
 
   publish: (data) ->
@@ -59,69 +84,60 @@ exports.Game = class Game
     @publish { action: 'start', startTime: @startTime }
 
   updateRatings: ->
-    if @points[@player1] > @points[@player2]
+    if @player1.points > @player2.points
       sa = 1
       sb = 0
-    else if @points[@player1] < @points[@player2]
+    else if @player1.points < @player2.points
       sa = 0
       sb = 1
     else
       sa = 0.5
       sb = 0.5
 
-    @users[@player1].updateRatings(@users[@player2], sa, sb)
-    @ratings[@player1] = @users[@player1].getRating()
-    @ratings[@player2] = @users[@player2].getRating()
+    #@users[@userId1].updateRatings(@users[@userId2], sa, sb)
 
   finish: ->
     @state = 'finish'
-    data =
-      action: 'finish'
-      ratings: {}
+    # data =
+    #   action: 'finish'
+    #   ratings: {}
 
-    @updateRatings()
+    # @updateRatings()
 
-    data.ratings[@player1] = @users[@player1].getRating()
-    data.ratings[@player2] = @users[@player2].getRating()
+    # data.ratings[@userId1] = @users[@userId1].getRating()
+    # data.ratings[@userId2] = @users[@userId2].getRating()
 
-    @publish data
+    # @publish data
 
   startTimer: () ->
     @startTime = new Date()
 
-  join: (player2) ->
-    @player2 = player2
-    @answers[@player2] = []
-    @points[@player2] = 0
-    @started[@player1] = false
-    new User @player2, (user) =>
-      @users[@player2] = user
-      @ratings[@player2] = user.getRating()
-      @publish { action: 'join', player: @users[@player2], rating: @ratings[@player2] }
-      @ready()
+  join: (userId2) ->
+    @player2 = new Player(userId2)
+    @players[userId2] = @player2
+    @publish { action: 'join', player2: @player2.playerData() }
+    @ready()
 
-  exit: (player) ->
+  exit: (userId) ->
 
   isOpen: ->
     @state == 'open'
 
-  isOpenForMe: (player) ->
-    @isOpen() && player != @player1
+  isOpenForUser: (userId) ->
+    @isOpen() && userId != @player1.userId
 
-  answer: (player, questionId, userChoice) ->
-    return 'invalid' unless player == @player1 || player == @player2
+  answer: (userId, questionId, answer) ->
     return 'invalid' unless @state == 'start'
-    return 'invalid' unless questionId == @answers[player].length
+
+    player = @players[userId]
+    return "invalid" unless player
 
     question = @questions[questionId]
-    if SS.shared.questions.isCorrect(userChoice, question)
-      @answers[player][questionId] = 'correct'
-      @points[player] += 10
-      @publish { action: 'answer', player: player, answer: 'correct', points: @points[player] }
+    if SS.shared.questions.isCorrect(answer, question)
+      points = player.answer(true)
+      @publish { action: 'answer', userId: userId, answer: 'correct', points: player.points }
       return 'correct'
     else
-      @answers[player][questionId] = 'incorrect'
-      @points[player] -= 10
-      @points[player] = 0 if @points[player] < 0
-      @publish { action: 'answer', player: player, answer: 'incorrect', points: @points[player] }
+      points = player.answer(false)
+      @publish { action: 'answer', userId: userId, answer: 'incorrect', points: player.points }
       return 'incorrect'

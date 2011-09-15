@@ -6,8 +6,9 @@ class GameView extends Backbone.View
   initialize: (options) ->
     $(window).bind "keypress", @handleKeyPress
 
-    @user = options.user
+    @userId = options.userId
     @game = options.gameData
+
     @$container = options.container
 
     @render()
@@ -39,8 +40,6 @@ class GameView extends Backbone.View
     @renderTimer()
 
     SS.events.on "info", (message, channel) =>
-      console.debug channel
-      console.debug message
       @[message.action](message)
 
     @$gameStates.hide()
@@ -59,11 +58,9 @@ class GameView extends Backbone.View
     @state = @game.state
 
   join: (o) ->
-    @game.player2 = o.player.username
-    @game.points[@game.player2] = 0
-    @game.ratings[@game.player2] = o.rating
+    @game.player2 = o.player2
     @renderPlayers()
-    @displayMessage("#{@game.player2} has joined!", "correct")
+    @displayMessage("#{@game.player2.userId} has joined!", "correct")
 
   open: ->
     @$gameStates.hide()
@@ -85,24 +82,26 @@ class GameView extends Backbone.View
     @state = 'start'
 
   playerStart: ->
-    SS.server.app.playerStart { user: @user, gameId: @game.id }, (result) =>
+    SS.server.app.playerStart { userId: @userId, gameId: @game.id }, (result) =>
 
   playerFinish: ->
-    SS.server.app.playerFinish { user: @user, gameId: @game.id }, (result) =>
+    SS.server.app.playerFinish { userId: @userId, gameId: @game.id }, (result) =>
 
   renderResults: (o) ->
-    if @game.points[@game.player1] > @game.points[@game.player2]
-      @$result.html("#{@game.player1} wins!")
-    else if @game.points[@game.player2] > @game.points[@game.player1]
-      @$result.html("#{@game.player2} wins!")
+    player1 = @game.player1
+    player2 = @game.player2
+    if player1.points > player2.points
+      @$result.html("#{player1.userId} wins!")
+    else if player2.points > player1.points
+      @$result.html("#{player2.userId} wins!")
     else
       @$result.html("Draw")
 
-    if o?
-      @game.ratings[@game.player1] = o.ratings[@game.player1]
-      @game.ratings[@game.player2] = o.ratings[@game.player2]
-      @.$("##{@game.player1} .rating").html(o.ratings[@game.player1])
-      @.$("##{@game.player2} .rating").html(o.ratings[@game.player2])
+    # if o?
+    #   @game.ratings[@game.player1] = o.ratings[@game.player1]
+    #   @game.ratings[@game.player2] = o.ratings[@game.player2]
+    #   @.$("##{@game.player1} .rating").html(o.ratings[@game.player1])
+    #   @.$("##{@game.player2} .rating").html(o.ratings[@game.player2])
 
   finish: (o) ->
     @$gameStates.hide()
@@ -111,11 +110,10 @@ class GameView extends Backbone.View
     @renderResults(o)
 
   answer: (o) ->
-    @game.points[o.player] = o.points
     @.$("##{o.player} .points").html("#{o.points} pts")
 
-    return if @user == o.player
-    answers = @.$("##{o.player} .answers")
+    return if @userId == o.userId
+    answers = @.$("##{o.userId} .answers")
     if o.answer == 'correct'
       answers.append('<div class="response correct" />')
     else
@@ -167,23 +165,36 @@ class GameView extends Backbone.View
 
   renderPlayers: ->
     @$players.html('')
-    @$players.append "<div id='#{@game.player1}'><p><span class='name'>#{@game.player1}</span> (<span class='rating'>#{@game.ratings[@game.player1]}</span>): <span class='points'>0 pts</span></p><div class='answers' /></div>"
-    player1Answers = @.$("##{@game.player1} .answers")
-    for answer in @game.answers[@game.player1]
+    @$players.append """
+      <div id='#{@game.player1.userId}'>
+      <p>
+        <span class='name'>#{@game.player1.userId}</span>: <span class='points'>0 pts</span>
+      </p>
+      <div class='answers' />
+      </div>"""
+    $player1Answers = @.$("##{@game.player1.userId} .answers")
+    for answer in @game.player1.answers
       if answer == 'correct'
-        player1Answers.append('<div class="response correct" />')
+        $player1Answers.append('<div class="response correct" />')
       else
-        player1Answers.append('<div class="response incorrect" />')
+        $player1Answers.append('<div class="response incorrect" />')
 
     if @game.player2?
-      @$players.append "<div style='clear:both' /><div id='#{@game.player2}'><p><span class='name'>#{@game.player2}</span> (<span class='rating'>#{@game.ratings[@game.player2]}</span>): <span class='points'>0 pts</span></p><div class='answers' /></div>" if @game.player2?
-      player2Answers = @.$("##{@game.player2} .answers")
-      if @game.answers[@game.player2]?
-        for answer in @game.answers[@game.player2]
-          if answer == 'correct'
-            player2Answers.append('<div class="response correct" />')
-          else
-            player2Answers.append('<div class="response incorrect" />')
+      @$players.append """
+        <div style='clear:both' />
+        <div id='#{@game.player2.userId}'>
+          <p>
+            <span class='name'>#{@game.player2.userId}</span>: <span class='points'>0 pts</span>
+          </p>
+          <div class='answers' />
+        </div>"""
+      $player2Answers = @.$("##{@game.player2.userId} .answers")
+
+      for answer in @game.player2.answers
+        if answer == 'correct'
+          $player2Answers.append('<div class="response correct" />')
+        else
+          $player2Answers.append('<div class="response incorrect" />')
 
   handleKeyPress: (event) =>
     if event.keyCode == 13
@@ -211,7 +222,7 @@ class GameView extends Backbone.View
 
   showExplanation: =>
     return unless @state == 'start'
-    answers = @.$("##{@user} .answers")
+    answers = @.$("##{@userId} .answers")
 
     # Convert fractions to floating point
     userChoice = @$answer.val()
@@ -226,7 +237,7 @@ class GameView extends Backbone.View
     @$explanation.show()
 
   confirmAnswer: =>
-    SS.server.app.answer { user: @user, gameId: @game.id, questionId: @currentQuestion, answer: @$answer.val() }, (result) ->
+    SS.server.app.answer { userId: @userId, gameId: @game.id, questionId: @currentQuestion, answer: @$answer.val() }, (result) ->
 
   continueToNextQuestion: =>
     @advanceQuestion()

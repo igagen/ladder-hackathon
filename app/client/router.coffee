@@ -9,38 +9,38 @@ class Router extends Backbone.Router
 
   lobby: ->
     @loadUser()
-    new LobbyView { user: @user, container: $("#content") }
+    new LobbyView { userId: @userId, container: $("#content") }
 
   solo: ->
     @loadUser()
-    SS.server.app.createSoloGame @user, (gameData) =>
+    SS.server.app.createSoloGame @userId, (gameData) =>
       @game(gameData)
 
   multi: (id) ->
     @loadUser()
     if id == "new"
-      SS.server.app.createTwoPlayerGame @user, (gameData) =>
+      SS.server.app.createTwoPlayerGame @userId, (gameData) =>
         @game(gameData)
     else if id == "join" 
-      SS.server.app.autoJoinTwoPlayerGame @user, (gameData) =>
+      SS.server.app.autoJoinTwoPlayerGame @userId, (gameData) =>
         @game(gameData)
 
   game: (gameData) ->
     @loadUser()
-    new GameView { user: @user, gameData: gameData, container: $("#content") }
+    new GameView { userId: @userId, gameData: gameData, container: $("#content") }
 
   joinGame: (id) ->
     @loadUser()
-    SS.server.app.joinSpecificTwoPlayerGame {id: id, user: @user}, (gameData) =>
+    SS.server.app.joinSpecificTwoPlayerGame {gameId: id, userId: @userId}, (gameData) =>
       @game(gameData)
 
   loadUser: ->
-    user = localStorage.getItem 'user'
-    if user?
-      @user = user
+    userId = localStorage.getItem 'userId'
+    if userId?
+      @userId = userId
     else
-      @user = prompt 'Username:'
-      localStorage.setItem 'user', @user
+      @userId = prompt 'Username:'
+      localStorage.setItem 'userId', @userId
 
 
 window.Router = Router

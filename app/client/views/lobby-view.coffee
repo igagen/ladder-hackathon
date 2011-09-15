@@ -1,6 +1,6 @@
 class LobbyView extends Backbone.View
   initialize: (options) ->
-    @user = options.user
+    @userId = options.userId
     @$container = options.container
 
     @render()
