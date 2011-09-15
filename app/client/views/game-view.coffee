@@ -109,11 +109,14 @@ class GameView extends Backbone.View
     @state = 'finish'
     @renderResults(o)
 
+  answerBarForPlayer: (userId) ->
+    @.$("##{userId} .answers")
+
   answer: (o) ->
     @.$("##{o.player} .points").html("#{o.points} pts")
 
     return if @userId == o.userId
-    answers = @.$("##{o.userId} .answers")
+    answers = @answerBarForPlayer(o.userId)
     if o.answer == 'correct'
       answers.append('<div class="response correct" />')
     else
@@ -172,7 +175,7 @@ class GameView extends Backbone.View
       </p>
       <div class='answers' />
       </div>"""
-    $player1Answers = @.$("##{@game.player1.userId} .answers")
+    $player1Answers = @answerBarForPlayer(@game.player1.userId)
     for answer in @game.player1.answers
       if answer == 'correct'
         $player1Answers.append('<div class="response correct" />')
@@ -188,7 +191,7 @@ class GameView extends Backbone.View
           </p>
           <div class='answers' />
         </div>"""
-      $player2Answers = @.$("##{@game.player2.userId} .answers")
+      $player2Answers = @answerBarForPlayer(@game.player2.userId)
 
       for answer in @game.player2.answers
         if answer == 'correct'
@@ -222,7 +225,7 @@ class GameView extends Backbone.View
 
   showExplanation: =>
     return unless @state == 'start'
-    answers = @.$("##{@userId} .answers")
+    answers = @answerBarForPlayer(@userId) 
 
     # Convert fractions to floating point
     userChoice = @$answer.val()
