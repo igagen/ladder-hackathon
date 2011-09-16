@@ -6,7 +6,7 @@ class LobbyView extends Backbone.View
     @render()
 
   render: ->
-    template = $("#lobby-template")
+    template = $("#template-lobby")
     $(@el).html template.html()
     @$container.html('')
     @$container.prepend(@el)

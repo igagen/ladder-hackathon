@@ -10,4 +10,3 @@ exports.init = ->
   Backbone.history.start()
 
   SS.events.on 'newMessage', (message) ->
-

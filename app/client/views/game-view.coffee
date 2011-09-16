@@ -123,7 +123,7 @@ class GameView extends Backbone.View
       answers.append('<div class="response incorrect" />')
 
   render: ->
-    template = $("#game-template")
+    template = $("#template-game")
     $(@el).html template.html()
     @$container.html('')
     @$container.prepend(@el)
