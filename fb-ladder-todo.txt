@@ -1,3 +1,11 @@
+TODAY:
+  - fix points
+  - fix summary screen
+  - clean up dead games
+  - underscore templates
+  - extract player view
+  - make player, timer, game use templates to populate
+
 Major tasks:
 
 
