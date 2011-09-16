@@ -166,38 +166,27 @@ class GameView extends Backbone.View
 
     MathJax.Hub.Typeset()
 
-  renderPlayers: ->
-    @$players.html('')
+  renderPlayer: (player) ->
     @$players.append """
-      <div id='#{@game.player1.userId}'>
+      <div id='#{player.userId}'>
       <p>
-        <span class='name'>#{@game.player1.userId}</span>: <span class='points'>0 pts</span>
+        <span class='name'>#{player.userId}</span>: <span class='points'>0 pts</span>
       </p>
       <div class='answers' />
       </div>"""
-    $player1Answers = @answerBarForPlayer(@game.player1.userId)
-    for answer in @game.player1.answers
+    $playerAnswers = @answerBarForPlayer(player.userId)
+    for answer in player.answers
       if answer == 'correct'
-        $player1Answers.append('<div class="response correct" />')
+        $playerAnswers.append('<div class="response correct" />')
       else
-        $player1Answers.append('<div class="response incorrect" />')
+        $playerAnswers.append('<div class="response incorrect" />')
 
-    if @game.player2?
-      @$players.append """
-        <div style='clear:both' />
-        <div id='#{@game.player2.userId}'>
-          <p>
-            <span class='name'>#{@game.player2.userId}</span>: <span class='points'>0 pts</span>
-          </p>
-          <div class='answers' />
-        </div>"""
-      $player2Answers = @answerBarForPlayer(@game.player2.userId)
-
-      for answer in @game.player2.answers
-        if answer == 'correct'
-          $player2Answers.append('<div class="response correct" />')
-        else
-          $player2Answers.append('<div class="response incorrect" />')
+  renderPlayers: ->
+    @$players.html('')
+    @renderPlayer(@game.player1)
+    if @game.player2
+      @$players.append "<div style='clear:both' />"
+      @renderPlayer(@game.player2)
 
   handleKeyPress: (event) =>
     if event.keyCode == 13
