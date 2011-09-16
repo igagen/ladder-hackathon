@@ -1,6 +1,6 @@
 class TimerView # extends Backbone.View
   constructor: (gameView, @duration, @playerFinish) ->
-    @duration = 5
+    @duration = 300
     @$timer = gameView.$("#timer")
     @$minutes = gameView.$("#timer .minutes")
     @$seconds = gameView.$("#timer .seconds")
@@ -34,6 +34,27 @@ class TimerView # extends Backbone.View
       clearInterval @timerInterval
       @playerFinish()
 
+class PlayerView
+  constructor: (@$container, player) ->
+    @userId = player.userId
+    @$answers = @$container.find("##{@userId} .answers")
+    @answers = player.answers
+    console.log "PlayerView", player, @userId, @answers
+    @render()
+
+  render: =>
+    @$container.append """
+      <div id='#{@userId}'>
+      <p>
+        <span class='name'>#{@userId}</span>: <span class='points'>0 pts</span>
+      </p>
+      <div class='answers' />
+      </div>"""
+
+    for answer in @answers
+      correctness = answer ? "correct" : "incorrect"
+      @$answers.append("<div class='response #{correctness}' />")
+
  
 class GameView extends Backbone.View
   events:
@@ -51,10 +72,8 @@ class GameView extends Backbone.View
     @render()
     @timerView = new TimerView(@, @game.duration, @playerFinish)
 
-
     @$message = @.$("#message")
     @$answer = @.$("#answer")
-
 
     @$players = @.$("#players")
     @$advanceButton = @.$("#advance-button")
@@ -131,9 +150,7 @@ class GameView extends Backbone.View
     @state = 'finish'
     @renderResults(o)
 
-  answerBarForPlayer: (userId) ->
-    @.$("##{userId} .answers")
-
+  # This handles a server broadcast of a player's answer
   answer: (o) ->
     @.$("##{o.player} .points").html("#{o.points} pts")
 
@@ -160,20 +177,14 @@ class GameView extends Backbone.View
 
     MathJax.Hub.Typeset()
 
+
+  ############
+  # TODO: construct PlayerView's only when player joins
   renderPlayer: (player) ->
-    @$players.append """
-      <div id='#{player.userId}'>
-      <p>
-        <span class='name'>#{player.userId}</span>: <span class='points'>0 pts</span>
-      </p>
-      <div class='answers' />
-      </div>"""
-    $playerAnswers = @answerBarForPlayer(player.userId)
-    for answer in player.answers
-      if answer == 'correct'
-        $playerAnswers.append('<div class="response correct" />')
-      else
-        $playerAnswers.append('<div class="response incorrect" />')
+    container = @$players
+    console.log "renderPlayer", player
+    playerView = new PlayerView(container, player)
+  #############
 
   renderPlayers: ->
     @$players.html('')
@@ -206,19 +217,33 @@ class GameView extends Backbone.View
       @inExplanation = false
       @$advanceButton.val("Confirm")
 
+  ############
+  # TODO: Player has this when going to views
+  answerBarForPlayer: (userId) ->
+    @.$("##{userId} .answers")
+  #########
+
   showExplanation: =>
     return unless @state == 'start'
+
+    #############
+    # TODO: move to Player
     answers = @answerBarForPlayer(@userId) 
+    #############
 
     # Convert fractions to floating point
     userChoice = @$answer.val()
 
     if SS.shared.questions.isCorrect(userChoice, @question)
       @displayMessage('Correct!', 'correct')
+      # TODO: Move to player
       answers.append('<div class="response correct" />')
+      ##########
     else
       @displayMessage('Incorrect', 'incorrect')
+      # TODO: Move to player
       answers.append('<div class="response incorrect" />')
+      #########
     
     @$explanation.show()
 
