@@ -169,7 +169,7 @@ class GameView extends Backbone.View
     
  
   render: ->
-    template = $("#game-template")
+    template = $("#template-game")
     $(@el).html template.html()
     @$container.html('')
     @$container.prepend(@el)
