@@ -37,9 +37,7 @@ class TimerView # extends Backbone.View
 class PlayerView
   constructor: (@$container, player) ->
     @userId = player.userId
-    @$answers = @$container.find("##{@userId} .answers")
     @answers = player.answers
-    console.log "PlayerView", player, @userId, @answers
     @render()
 
   render: =>
@@ -51,9 +49,13 @@ class PlayerView
       <div class='answers' />
       </div>"""
 
+    @$answers = $("##{@userId} .answers") # TODO, scope this backbone view
     for answer in @answers
-      correctness = answer ? "correct" : "incorrect"
-      @$answers.append("<div class='response #{correctness}' />")
+      @appendAnswer(answer)
+      
+  appendAnswer: (correct) =>
+    correctness = if correct then "correct" else "incorrect"
+    @$answers.append("<div class='response #{correctness}' />")
 
  
 class GameView extends Backbone.View
@@ -88,6 +90,11 @@ class GameView extends Backbone.View
     @advanceQuestion() # load first question
     # @currentQuestion = @game.answers[@user].length
     # @question = @game.questions[@currentQuestion]
+
+    ############ 
+    # TODO: clean up?
+    @playerViews = {}
+    ############
 
     @renderQuestion()
     @renderPlayers()
@@ -125,7 +132,6 @@ class GameView extends Backbone.View
     SS.server.app.playerStart { userId: @userId, gameId: @game.id }, (result) =>
 
   playerFinish: =>
-    console.log "finish", @userId
     SS.server.app.playerFinish { userId: @userId, gameId: @game.id }, (result) =>
 
   renderResults: (o) ->
@@ -155,12 +161,13 @@ class GameView extends Backbone.View
     @.$("##{o.player} .points").html("#{o.points} pts")
 
     return if @userId == o.userId
-    answers = @answerBarForPlayer(o.userId)
-    if o.answer == 'correct'
-      answers.append('<div class="response correct" />')
-    else
-      answers.append('<div class="response incorrect" />')
 
+    ######### playerView stuff
+    console.log("appendAnswer from showExplanation")
+    @playerViews[o.userId].appendAnswer(o.correct)
+    #########
+    
+ 
   render: ->
     template = $("#game-template")
     $(@el).html template.html()
@@ -182,8 +189,8 @@ class GameView extends Backbone.View
   # TODO: construct PlayerView's only when player joins
   renderPlayer: (player) ->
     container = @$players
-    console.log "renderPlayer", player
     playerView = new PlayerView(container, player)
+    @playerViews[player.userId] = playerView
   #############
 
   renderPlayers: ->
@@ -217,33 +224,21 @@ class GameView extends Backbone.View
       @inExplanation = false
       @$advanceButton.val("Confirm")
 
-  ############
-  # TODO: Player has this when going to views
-  answerBarForPlayer: (userId) ->
-    @.$("##{userId} .answers")
-  #########
-
   showExplanation: =>
     return unless @state == 'start'
-
-    #############
-    # TODO: move to Player
-    answers = @answerBarForPlayer(@userId) 
-    #############
 
     # Convert fractions to floating point
     userChoice = @$answer.val()
 
-    if SS.shared.questions.isCorrect(userChoice, @question)
+    correct = SS.shared.questions.isCorrect(userChoice, @question)
+    if correct
       @displayMessage('Correct!', 'correct')
-      # TODO: Move to player
-      answers.append('<div class="response correct" />')
-      ##########
     else
       @displayMessage('Incorrect', 'incorrect')
-      # TODO: Move to player
-      answers.append('<div class="response incorrect" />')
-      #########
+
+    ######### playerView stuff
+    @playerViews[@userId].appendAnswer(correct)
+    #########
     
     @$explanation.show()
 

@@ -135,9 +135,7 @@ exports.Game = class Game
     question = @questions[questionId]
     if SS.shared.questions.isCorrect(answer, question)
       points = player.answer(true)
-      @publish { action: 'answer', userId: userId, answer: 'correct', points: player.points }
-      return 'correct'
+      @publish { action: 'answer', userId: userId, correct: true, points: player.points }
     else
       points = player.answer(false)
-      @publish { action: 'answer', userId: userId, answer: 'incorrect', points: player.points }
-      return 'incorrect'
+      @publish { action: 'answer', userId: userId, correct: false, points: player.points }
