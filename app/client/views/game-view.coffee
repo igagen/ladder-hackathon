@@ -1,3 +1,40 @@
+class TimerView # extends Backbone.View
+  constructor: (gameView, @duration, @playerFinish) ->
+    @duration = 5
+    @$timer = gameView.$("#timer")
+    @$minutes = gameView.$("#timer .minutes")
+    @$seconds = gameView.$("#timer .seconds")
+    @renderRemainingTime(@duration)
+
+  start: ->
+    currentTime = new Date().getTime() 
+    @endTime = new Date(currentTime + @duration * 1000)
+    @timerInterval = setInterval @renderTimer, 250
+
+  renderTimer: =>
+    currentTime = new Date()
+    remainingMillis = @endTime - currentTime 
+    remainingTime = Math.floor(remainingMillis / 1000)
+    @renderRemainingTime(remainingTime)
+
+  renderRemainingTime: (remainingTime) ->
+    if remainingTime > 0
+      remainingMinutes = Math.floor(remainingTime / 60)
+      remainingSeconds = Math.floor(remainingTime % 60)
+      # zero pad
+      remainingMinutes = "0" + remainingMinutes if remainingMinutes < 10
+      remainingSeconds = "0" + remainingSeconds if remainingSeconds < 10
+
+      @$minutes.html(remainingMinutes)
+      @$seconds.html(remainingSeconds)
+    else
+      @$minutes.html("00")
+      @$seconds.html("00")
+      @$timer.addClass('finished')
+      clearInterval @timerInterval
+      @playerFinish()
+
+ 
 class GameView extends Backbone.View
   events:
     "click #advance-button": "handleAdvance"
@@ -12,13 +49,14 @@ class GameView extends Backbone.View
     @$container = options.container
 
     @render()
+    @timerView = new TimerView(@, @game.duration, @playerFinish)
+
 
     @$message = @.$("#message")
     @$answer = @.$("#answer")
+
+
     @$players = @.$("#players")
-    @$timer = @.$("#timer")
-    @$minutes = @.$("#timer .minutes")
-    @$seconds = @.$("#timer .seconds")
     @$advanceButton = @.$("#advance-button")
     @$gameStates= @.$(".game-state")
     @$open = @.$(".open")
@@ -32,28 +70,14 @@ class GameView extends Backbone.View
     # @currentQuestion = @game.answers[@user].length
     # @question = @game.questions[@currentQuestion]
 
-    @totalTime = @game.duration
-    @elapsedTime = 0
-
     @renderQuestion()
     @renderPlayers()
-    @renderTimer()
 
     SS.events.on "info", (message, channel) =>
       @[message.action](message)
 
     @$gameStates.hide()
     @.$(".#{@game.state}").show()
-
-    if @game.state == 'start'
-      @startTime = new Date(@game.startTime)
-      @startTimer()
-
-    if @game.state == 'finish'
-      @$minutes.html("00")
-      @$seconds.html("00")
-      @$timer.addClass('finished')
-      @renderResults()
 
     @state = @game.state
 
@@ -73,10 +97,7 @@ class GameView extends Backbone.View
     @state = 'ready'
 
   start: (o) ->
-    @game.startTime = o.startTime unless @game.startTime?
-    @game.startTime = @startTime = new Date()
-
-    @startTimer()
+    @timerView.start()
     @$gameStates.hide()
     @$started.show()
     @state = 'start'
@@ -84,7 +105,8 @@ class GameView extends Backbone.View
   playerStart: ->
     SS.server.app.playerStart { userId: @userId, gameId: @game.id }, (result) =>
 
-  playerFinish: ->
+  playerFinish: =>
+    console.log "finish", @userId
     SS.server.app.playerFinish { userId: @userId, gameId: @game.id }, (result) =>
 
   renderResults: (o) ->
@@ -127,34 +149,6 @@ class GameView extends Backbone.View
     $(@el).html template.html()
     @$container.html('')
     @$container.prepend(@el)
-
-  renderTimer: ->
-    remainingTime = @totalTime - @elapsedTime
-    if remainingTime > 0
-      remainingMinutes = Math.floor(remainingTime / 60)
-      remainingSeconds = Math.floor(remainingTime % 60)
-      # zero pad
-      remainingMinutes = "0" + remainingMinutes if remainingMinutes < 10
-      remainingSeconds = "0" + remainingSeconds if remainingSeconds < 10
-
-      @$minutes.html(remainingMinutes)
-      @$seconds.html(remainingSeconds)
-    else
-      @$minutes.html("00")
-      @$seconds.html("00")
-      @$timer.addClass('finished')
-      clearInterval @timerInterval
-      @playerFinish()
-
-  startTimer: ->
-    @timerInterval = setInterval @updateTimer, 250
-    @updateTimer()
-
-  updateTimer: =>
-    currentTime = new Date()
-    elapsedMillis = currentTime - @startTime
-    @elapsedTime = Math.floor(elapsedMillis / 1000)
-    @renderTimer()
 
   renderQuestion: ->
     @$explanation = @.$("#explanation")

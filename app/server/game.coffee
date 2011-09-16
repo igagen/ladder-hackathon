@@ -68,7 +68,7 @@ exports.Game = class Game
     player = @players[userId]
     player.finished = true
     # WRONG
-    if @player1.finished && @player2.finished
+    if @player1.finished && (@solo || @player2.finished)
       @finish()
 
   publish: (data) ->
