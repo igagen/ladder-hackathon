@@ -45,3 +45,11 @@ Major tasks:
 
   ISSUES:
     fix points
+
+PROBLEM: Facebook apps send POST request w/info we need for SS app, no hook yet
+
+OPTIONS:
+  hack server module (ugly, forks): works
+  write our own proxy: works, but lame
+  nginx POST to separate app that writes to redis: lame, because we want @session directly
+  we punt on FB usernames and just let people have their own userid for the game

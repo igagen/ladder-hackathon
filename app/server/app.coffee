@@ -34,6 +34,7 @@ exports.actions =
       game.playerStart params.userId
 
   playerFinish: (params, cb) ->
+    console.log "app", params
     game = getGame(params.gameId)
     if game?
       game.playerFinish params.userId
