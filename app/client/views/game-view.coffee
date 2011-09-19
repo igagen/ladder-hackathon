@@ -96,15 +96,16 @@ class GameView extends Backbone.View
     @state = 'finish'
     @renderResults(o)
 
-  # This handles a server broadcast of a player's answer
+  # This handles a server broadcast of a player's answer.  It's slightly 
+  # awkward that the server comes through here first.
   answer: (o) ->
-    @.$("##{o.player} .points").html("#{o.points} pts")
+    ######### playerView stuff
+    playerView = @playerViews[o.userId]
+    playerView.updatePoints(o.points)
 
     return if @userId == o.userId
 
-    ######### playerView stuff
-    console.log("appendAnswer from showExplanation")
-    @playerViews[o.userId].appendAnswer(o.correct)
+    playerView.appendAnswer(o.correct)
     #########
     
  

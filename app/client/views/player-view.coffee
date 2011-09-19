@@ -6,18 +6,23 @@ class PlayerView
     @render()
 
   render: =>
-    @$container.append """
+    @$playerDiv = $ """
       <div id='#{@userId}'>
       <p>
         <span class='name'>#{@userName}</span>: <span class='points'>0 pts</span>
       </p>
       <div class='answers' />
       </div>"""
+    @$points = $(@$playerDiv.find(".points"))
+    @$container.append @$playerDiv
 
     @$answers = $("##{@userId} .answers") # TODO, scope this backbone view
     for answer in @answers
       @appendAnswer(answer)
-      
+
+  updatePoints: (points) =>
+    @$points.html("#{points} pts")
+
   appendAnswer: (correct) =>
     correctness = if correct then "correct" else "incorrect"
     @$answers.append("<div class='response #{correctness}' />")
