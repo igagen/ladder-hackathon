@@ -27,16 +27,13 @@ class GameView extends Backbone.View
     @$result = @.$(".finish h2")
     @inExplanation = false
 
-    @advanceQuestion() # load first question
-    # @currentQuestion = @game.answers[@user].length
-    # @question = @game.questions[@currentQuestion]
+    @continueToNextQuestion() # load first question
 
     ############ 
     # TODO: clean up?
     @playerViews = {}
     ############
 
-    @renderQuestion()
     @renderPlayers()
 
     SS.events.on "info", (message, channel) =>
@@ -115,16 +112,6 @@ class GameView extends Backbone.View
     @$container.html('')
     @$container.prepend(@el)
 
-  renderQuestion: ->
-    @$explanation = @.$("#explanation")
-    @$explanation.hide()
-    @$explanation.html(@question.explanation)
-
-    @$stimulus = @.$("#stimulus")
-    @$stimulus.html(@question.stimulus)
-
-    MathJax.Hub.Typeset()
-
 
   ############
   # TODO: construct PlayerView's only when player joins
@@ -145,7 +132,7 @@ class GameView extends Backbone.View
     if event.keyCode == 13
       @handleAdvance()
 
-  advanceQuestion: ->
+  continueToNextQuestion: ->
     if @currentQuestion?
       @currentQuestion++
     else
@@ -153,10 +140,11 @@ class GameView extends Backbone.View
     @currentQuestion = 0 if @currentQuestion >= @game.questions.length
     @question = @game.questions[@currentQuestion]
     @$answer.val('')
+    @questionView = new QuestionView(@question, @)
+    @questionView.render()
 
   handleAdvance: =>
     if !@inExplanation
-      @showExplanation()
       @confirmAnswer()
       @inExplanation = true
       @$advanceButton.val("Advance")
@@ -165,7 +153,7 @@ class GameView extends Backbone.View
       @inExplanation = false
       @$advanceButton.val("Confirm")
 
-  showExplanation: =>
+  confirmAnswer: =>
     return unless @state == 'start'
 
     # Convert fractions to floating point
@@ -181,14 +169,9 @@ class GameView extends Backbone.View
     @playerViews[@userId].appendAnswer(correct)
     #########
     
-    @$explanation.show()
+    @questionView.showExplanation()
 
-  confirmAnswer: =>
     SS.server.app.answer { userId: @userId, gameId: @game.id, questionId: @currentQuestion, answer: @$answer.val() }, (result) ->
-
-  continueToNextQuestion: =>
-    @advanceQuestion()
-    @renderQuestion()
 
   displayMessage: (message, klass = "") ->
     @$message.html(message)
