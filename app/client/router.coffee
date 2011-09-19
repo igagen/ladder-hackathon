@@ -35,13 +35,10 @@ class Router extends Backbone.Router
         @game(gameData)
 
   loadUser: (cb) ->
-    userId = localStorage.getItem 'userId'
-    if userId?
-      @userId = userId
+    if @userId?
       cb()
     else
       @userId = prompt 'Username:'
-      localStorage.setItem 'userId', @userId
       SS.server.app.login @userId, cb
 
 
