@@ -15,7 +15,10 @@ exports.actions =
     if user
       return cb(UserStore.get(userId))
     else
-      return cb(new User(userId))
+      # big hack to drive out distinction between
+      # internal userId and userName
+      userName = userId + " Smith"
+      return new User(userId, userName, cb)
 
   getGame: (id, cb) ->
     game = getGame(id)
@@ -34,7 +37,6 @@ exports.actions =
       game.playerStart params.userId
 
   playerFinish: (params, cb) ->
-    console.log "app", params
     game = getGame(params.gameId)
     if game?
       game.playerFinish params.userId

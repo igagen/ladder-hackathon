@@ -3,26 +3,26 @@ UserStore = require("./store").get("User")
 exports.User = class User
   K: 24
 
-  constructor: (@username, cb) ->
-    key = "user:#{@username}:rating"
+  constructor: (@id, @name, cb) ->
+    key = "user:#{@id}:rating"
 
-    UserStore.save(@, @username)
+    UserStore.save(@, @id)
 
-    R.get key, (error, data) =>
-      if data?
-        @rating = parseFloat(data)
-      else
-        @rating = 1000
-        @setRating(@rating)
+    # R.get key, (error, data) =>
+    #   if data?
+    #     @rating = parseFloat(data)
+    #   else
+    #     @rating = 1000
+    #     @setRating(@rating)
 
-      cb(@)
+    cb(@)
 
   getRating: ->
     @rating
 
   setRating: (rating) ->
     @rating = rating
-    R.set "user:#{@username}:rating", @rating
+    R.set "user:#{@id}:rating", @rating
 
   # Update both players ratings based on match results
   # sa, sb are the outcome values from this player's perspective (sa) and the opponents perspective (sb)

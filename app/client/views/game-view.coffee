@@ -37,6 +37,7 @@ class TimerView # extends Backbone.View
 class PlayerView
   constructor: (@$container, player) ->
     @userId = player.userId
+    @userName = player.userName
     @answers = player.answers
     @render()
 
@@ -44,7 +45,7 @@ class PlayerView
     @$container.append """
       <div id='#{@userId}'>
       <p>
-        <span class='name'>#{@userId}</span>: <span class='points'>0 pts</span>
+        <span class='name'>#{@userName}</span>: <span class='points'>0 pts</span>
       </p>
       <div class='answers' />
       </div>"""

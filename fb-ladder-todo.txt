@@ -1,3 +1,6 @@
+MONDAY:
+  - clean up CSS ids to support numerical userids
+
 TODAY:
   - fix points
   - fix summary screen
