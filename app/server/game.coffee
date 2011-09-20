@@ -75,18 +75,26 @@ exports.Game = class Game
 
     #@users[@userId1].updateRatings(@users[@userId2], sa, sb)
 
+  gameResults: ->
+    return "Good Job!" if @solo
+    if @player1.points > @player2.points
+      "#{@player1.name} wins!"
+    else if @player2.points > @player1.points
+      "#{@player2.name} wins!"
+    else
+      "Draw"
+
   finish: ->
     @state = 'finish'
-    # data =
-    #   action: 'finish'
-    #   ratings: {}
 
     # @updateRatings()
 
     # data.ratings[@userId1] = @users[@userId1].getRating()
     # data.ratings[@userId2] = @users[@userId2].getRating()
 
-    # @publish data
+    @publish
+      action: 'finish'
+      result: @gameResults()
 
   startTimer: () ->
     @startTime = new Date()

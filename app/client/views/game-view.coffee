@@ -71,27 +71,11 @@ class GameView extends Backbone.View
   playerFinish: =>
     SS.server.app.playerFinish { userId: @userId, gameId: @game.id }, (result) =>
 
-  renderResults: (o) ->
-    player1 = @game.player1
-    player2 = @game.player2
-    if player1.points > player2.points
-      @$result.html("#{player1.userId} wins!")
-    else if player2.points > player1.points
-      @$result.html("#{player2.userId} wins!")
-    else
-      @$result.html("Draw")
-
-    # if o?
-    #   @game.ratings[@game.player1] = o.ratings[@game.player1]
-    #   @game.ratings[@game.player2] = o.ratings[@game.player2]
-    #   @.$("##{@game.player1} .rating").html(o.ratings[@game.player1])
-    #   @.$("##{@game.player2} .rating").html(o.ratings[@game.player2])
-
   finish: (o) ->
     @$gameStates.hide()
     @$finished.show()
     @state = 'finish'
-    @renderResults(o)
+    @$result.html o.result
 
   # This handles a server broadcast of a player's answer.  It's slightly 
   # awkward that the server comes through here first.
@@ -105,7 +89,6 @@ class GameView extends Backbone.View
     playerView.appendAnswer(o.correct)
     #########
     
- 
   render: ->
     template = $("#template-game")
     $(@el).html template.html()

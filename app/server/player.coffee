@@ -3,6 +3,7 @@ UserStore = require("./store").get("User")
 exports.Player = class Player
   constructor: (userId) ->
     @user = UserStore.get(userId)
+    @name = @user.name
     @points = 0
     @started = false
     @finished = false
@@ -19,6 +20,6 @@ exports.Player = class Player
 
   playerData: ->
     userId: @user.id
-    userName: @user.name
+    userName: @name
     answers: @answers
     points: @points
