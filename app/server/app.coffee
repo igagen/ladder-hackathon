@@ -11,10 +11,12 @@ exports.actions =
     cb()
 
   login: (userId, cb) ->
+    console.log "In login!!!!!!!!!"
     user = UserStore.get(userId)
     if user
       return cb(UserStore.get(userId))
     else
+      console.log "creating new User object"
       # big hack to drive out distinction between
       # internal userId and userName
       userName = userId + " Smith"

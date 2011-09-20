@@ -1,64 +1,3 @@
-class TimerView # extends Backbone.View
-  constructor: (gameView, @duration, @playerFinish) ->
-    @duration = 300
-    @$timer = gameView.$("#timer")
-    @$minutes = gameView.$("#timer .minutes")
-    @$seconds = gameView.$("#timer .seconds")
-    @renderRemainingTime(@duration)
-
-  start: ->
-    currentTime = new Date().getTime() 
-    @endTime = new Date(currentTime + @duration * 1000)
-    @timerInterval = setInterval @renderTimer, 250
-
-  renderTimer: =>
-    currentTime = new Date()
-    remainingMillis = @endTime - currentTime 
-    remainingTime = Math.floor(remainingMillis / 1000)
-    @renderRemainingTime(remainingTime)
-
-  renderRemainingTime: (remainingTime) ->
-    if remainingTime > 0
-      remainingMinutes = Math.floor(remainingTime / 60)
-      remainingSeconds = Math.floor(remainingTime % 60)
-      # zero pad
-      remainingMinutes = "0" + remainingMinutes if remainingMinutes < 10
-      remainingSeconds = "0" + remainingSeconds if remainingSeconds < 10
-
-      @$minutes.html(remainingMinutes)
-      @$seconds.html(remainingSeconds)
-    else
-      @$minutes.html("00")
-      @$seconds.html("00")
-      @$timer.addClass('finished')
-      clearInterval @timerInterval
-      @playerFinish()
-
-class PlayerView
-  constructor: (@$container, player) ->
-    @userId = player.userId
-    @userName = player.userName
-    @answers = player.answers
-    @render()
-
-  render: =>
-    @$container.append """
-      <div id='#{@userId}'>
-      <p>
-        <span class='name'>#{@userName}</span>: <span class='points'>0 pts</span>
-      </p>
-      <div class='answers' />
-      </div>"""
-
-    @$answers = $("##{@userId} .answers") # TODO, scope this backbone view
-    for answer in @answers
-      @appendAnswer(answer)
-      
-  appendAnswer: (correct) =>
-    correctness = if correct then "correct" else "incorrect"
-    @$answers.append("<div class='response #{correctness}' />")
-
- 
 class GameView extends Backbone.View
   events:
     "click #advance-button": "handleAdvance"
@@ -88,16 +27,13 @@ class GameView extends Backbone.View
     @$result = @.$(".finish h2")
     @inExplanation = false
 
-    @advanceQuestion() # load first question
-    # @currentQuestion = @game.answers[@user].length
-    # @question = @game.questions[@currentQuestion]
+    @continueToNextQuestion() # load first question
 
     ############ 
     # TODO: clean up?
     @playerViews = {}
     ############
 
-    @renderQuestion()
     @renderPlayers()
 
     SS.events.on "info", (message, channel) =>
@@ -135,55 +71,29 @@ class GameView extends Backbone.View
   playerFinish: =>
     SS.server.app.playerFinish { userId: @userId, gameId: @game.id }, (result) =>
 
-  renderResults: (o) ->
-    player1 = @game.player1
-    player2 = @game.player2
-    if player1.points > player2.points
-      @$result.html("#{player1.userId} wins!")
-    else if player2.points > player1.points
-      @$result.html("#{player2.userId} wins!")
-    else
-      @$result.html("Draw")
-
-    # if o?
-    #   @game.ratings[@game.player1] = o.ratings[@game.player1]
-    #   @game.ratings[@game.player2] = o.ratings[@game.player2]
-    #   @.$("##{@game.player1} .rating").html(o.ratings[@game.player1])
-    #   @.$("##{@game.player2} .rating").html(o.ratings[@game.player2])
-
   finish: (o) ->
     @$gameStates.hide()
     @$finished.show()
     @state = 'finish'
-    @renderResults(o)
+    @$result.html o.result
 
-  # This handles a server broadcast of a player's answer
+  # This handles a server broadcast of a player's answer.  It's slightly 
+  # awkward that the server comes through here first.
   answer: (o) ->
-    @.$("##{o.player} .points").html("#{o.points} pts")
+    ######### playerView stuff
+    playerView = @playerViews[o.userId]
+    playerView.updatePoints(o.points)
 
     return if @userId == o.userId
 
-    ######### playerView stuff
-    console.log("appendAnswer from showExplanation")
-    @playerViews[o.userId].appendAnswer(o.correct)
+    playerView.appendAnswer(o.correct)
     #########
     
- 
   render: ->
     template = $("#template-game")
     $(@el).html template.html()
     @$container.html('')
     @$container.prepend(@el)
-
-  renderQuestion: ->
-    @$explanation = @.$("#explanation")
-    @$explanation.hide()
-    @$explanation.html(@question.explanation)
-
-    @$stimulus = @.$("#stimulus")
-    @$stimulus.html(@question.stimulus)
-
-    MathJax.Hub.Typeset()
 
 
   ############
@@ -205,7 +115,7 @@ class GameView extends Backbone.View
     if event.keyCode == 13
       @handleAdvance()
 
-  advanceQuestion: ->
+  continueToNextQuestion: ->
     if @currentQuestion?
       @currentQuestion++
     else
@@ -213,10 +123,11 @@ class GameView extends Backbone.View
     @currentQuestion = 0 if @currentQuestion >= @game.questions.length
     @question = @game.questions[@currentQuestion]
     @$answer.val('')
+    @questionView = new QuestionView(@question, @)
+    @questionView.render()
 
   handleAdvance: =>
     if !@inExplanation
-      @showExplanation()
       @confirmAnswer()
       @inExplanation = true
       @$advanceButton.val("Advance")
@@ -225,7 +136,7 @@ class GameView extends Backbone.View
       @inExplanation = false
       @$advanceButton.val("Confirm")
 
-  showExplanation: =>
+  confirmAnswer: =>
     return unless @state == 'start'
 
     # Convert fractions to floating point
@@ -241,14 +152,9 @@ class GameView extends Backbone.View
     @playerViews[@userId].appendAnswer(correct)
     #########
     
-    @$explanation.show()
+    @questionView.showExplanation()
 
-  confirmAnswer: =>
     SS.server.app.answer { userId: @userId, gameId: @game.id, questionId: @currentQuestion, answer: @$answer.val() }, (result) ->
-
-  continueToNextQuestion: =>
-    @advanceQuestion()
-    @renderQuestion()
 
   displayMessage: (message, klass = "") ->
     @$message.html(message)

@@ -1,29 +1,5 @@
 GameStore = require("./store").get("Game")
-UserStore = require("./store").get("User")
-{User} = require("./user")
-
-class Player
-  constructor: (userId) ->
-    @user = UserStore.get(userId)
-    @points = 0
-    @started = false
-    @finished = false
-    @answers = []
-
-  answer: (correct) ->
-    @answers.push(correct)
-    if correct
-      @points += 10
-    else
-      @points -= 10
-      @points = 0 if @points < 0
-    @points
-
-  playerData: ->
-    userId: @user.id
-    userName: @user.name
-    answers: @answers
-    points: @points
+{Player} = require("./player")
 
 exports.Game = class Game
   NUM_QUESTIONS: 50
@@ -99,18 +75,26 @@ exports.Game = class Game
 
     #@users[@userId1].updateRatings(@users[@userId2], sa, sb)
 
+  gameResults: ->
+    return "Good Job!" if @solo
+    if @player1.points > @player2.points
+      "#{@player1.name} wins!"
+    else if @player2.points > @player1.points
+      "#{@player2.name} wins!"
+    else
+      "Draw"
+
   finish: ->
     @state = 'finish'
-    # data =
-    #   action: 'finish'
-    #   ratings: {}
 
     # @updateRatings()
 
     # data.ratings[@userId1] = @users[@userId1].getRating()
     # data.ratings[@userId2] = @users[@userId2].getRating()
 
-    # @publish data
+    @publish
+      action: 'finish'
+      result: @gameResults()
 
   startTimer: () ->
     @startTime = new Date()
