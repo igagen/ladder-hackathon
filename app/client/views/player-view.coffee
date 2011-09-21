@@ -7,10 +7,11 @@ class PlayerView
 
   render: =>
     @$playerDiv = $ """
-      <div id='player-#{@userId}'>
-      <p>
-        <span class='name'>#{@userName}</span>: <span class='points'>0 pts</span>
-      </p>
+      <div id='player-#{@userId}' class='player'>
+        <img src="http://graph.facebook.com/#{@userId}/picture" />
+        <p>
+          <span class='name'>#{@userName}</span>: <span class='points'>0 pts</span>
+        </p>
       <div class='answers' />
       </div>"""
     @$points = $(@$playerDiv.find(".points"))
