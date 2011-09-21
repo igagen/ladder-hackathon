@@ -64,7 +64,16 @@ exports.Game = class Game
     @startTimer()
     @publish { action: 'start', startTime: @startTime }
 
+  # Update both players ratings based on match results
+  # sa, sb are the outcome values from this player's perspective (sa) and the opponents perspective (sb)
+  # If this player won, sa would be 1.0 and sb would be 0.0
+  # If the match was a draw, sa and sb would both be 0.5
   updateRatings: ->
+    return if @solo
+
+    user1 = @player1.user
+    user2 = @player2.user
+
     if @player1.points > @player2.points
       sa = 1
       sb = 0
@@ -75,9 +84,24 @@ exports.Game = class Game
       sa = 0.5
       sb = 0.5
 
-    #@users[@userId1].updateRatings(@users[@userId2], sa, sb)
+    ra = user1.rating
+    rb = user2.rating
 
-  gameResults: ->
+    qa = Math.pow(10, ra / 400)
+    qb = Math.pow(10, rb / 400)
+
+    # Expected outcomes
+    ea = qa / (qa + qb)
+    eb = qb / (qa + qb)
+
+    # Calculate updated ratings
+    ra = Math.floor(ra + @K * (sa - ea))
+    rb = Math.floor(rb + @K * (sb - eb))
+
+    user1.rating = ra
+    user2.rating = rb
+
+  winLoseOrDraw: ->
     return "Good Job!" if @solo
     if @player1.points > @player2.points
       "#{@player1.name} wins!"
@@ -89,14 +113,15 @@ exports.Game = class Game
   finish: ->
     @state = 'finish'
 
-    # @updateRatings()
-
-    # data.ratings[@userId1] = @users[@userId1].getRating()
-    # data.ratings[@userId2] = @users[@userId2].getRating()
+    @updateRatings() unless @solo
 
     @publish
       action: 'finish'
-      result: @gameResults()
+      result: @winLoseOrDraw()
+      player1:
+        rating: @player1.rating
+      player2:
+        rating: @player2?.rating
 
   startTimer: () ->
     @startTime = new Date()
