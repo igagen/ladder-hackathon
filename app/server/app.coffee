@@ -22,7 +22,14 @@ exports.actions =
   init: (cb) ->
     cb()
 
-  login: (auth, cb) ->
+  login: (userId, cb) ->
+    user = UserStore.get(userId)
+    if user
+      @session.setUserId user.id, cb
+    else
+      new User userId, userId, => @session.setUserId userId, cb
+
+  fbLogin: (auth, cb) ->
     # TODO: verify signed request
 
     user = UserStore.get(auth.user_id)
