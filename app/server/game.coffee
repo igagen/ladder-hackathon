@@ -1,5 +1,6 @@
 GameStore = require("./store").get("Game")
 {Player} = require("./player")
+Questions = require("./questions")
 
 exports.Game = class Game
   NUM_QUESTIONS: 50
@@ -16,7 +17,7 @@ exports.Game = class Game
     @state = 'open'
 
     for i in [0...@NUM_QUESTIONS]
-      @questions[i] = SS.shared.questions.get(i)
+      @questions[i] = Questions.get(i)
 
     @id = GameStore.save(@)
 
