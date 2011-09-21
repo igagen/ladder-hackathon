@@ -8,7 +8,8 @@ class Store
   constructor: ->
     @hash = {}
     @nextId = 0
-  
+
+  # TODO: This should take a callback
   save: (obj, id = null) ->
     id ?= @nextId++
     @hash[id] = obj
@@ -19,11 +20,3 @@ class Store
 
   all: ->
     obj for id, obj of @hash
-
-# in other modules
-# GameStore = Store.for("Game")
-# UserStore = Store.for("User")
-
-# GameStore.save(game)
-
-# GameStore.get(gameId)

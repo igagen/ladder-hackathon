@@ -8,13 +8,10 @@ class LobbyView extends Backbone.View
   fbLogin: =>
     FB.login ((response) ->
       if response.authResponse
-        console.log "Welcome!  Fetching your information.... "
-        FB.api "/me", (response) ->
-          console.log "Good to see you, " + response.name + "."
-          FB.logout (response) ->
-            console.log "Logged out."
+        SS.server.app.login response.authResponse, ->
+          console.log "Authentication complete"
       else
-        console.log "User cancelled login or did not fully authorize."
+        console.log "Authentication failed"
     ), scope: "email"
 
   render: ->

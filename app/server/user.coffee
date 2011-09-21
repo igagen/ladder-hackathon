@@ -4,16 +4,8 @@ exports.User = class User
   K: 24
 
   constructor: (@id, @name, cb) ->
-    key = "user:#{@id}:rating"
-
+    @rating = 1000
     UserStore.save(@, @id)
-
-    # R.get key, (error, data) =>
-    #   if data?
-    #     @rating = parseFloat(data)
-    #   else
-    #     @rating = 1000
-    #     @setRating(@rating)
 
     cb(@)
 

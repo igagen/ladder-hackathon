@@ -30,9 +30,7 @@ connect = require('connect')
 # Stack for Primary Server
 exports.primary =
   [
-    #connect.logger()            # example of calling in-built connect middleware. be sure to install connect in THIS project and uncomment out the line above
-    #require('connect-i18n')()   # example of using 3rd-party middleware from https://github.com/senchalabs/connect/wiki
-    connect.cookieParser()                      # example of using your own custom middleware (using the example above)
+    connect.cookieParser()
     facebookSession()
   ]
 
