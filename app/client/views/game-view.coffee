@@ -45,6 +45,10 @@ class GameView extends Backbone.View
 
     @state = @game.state
 
+    $(window).bind 'hashchange', =>
+      SS.server.app.clearOpenGames @userId, ->
+        console.log "Finished clearing open games for user:", @userId
+
   join: (o) ->
     @game.player2 = o.player2
     @renderPlayers()

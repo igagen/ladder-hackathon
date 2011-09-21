@@ -7,8 +7,8 @@ class LoginView extends Backbone.View
   fbLogin: =>
     FB.login ((response) ->
       if response.authResponse
-        SS.server.app.login response.authResponse, ->
-          window.location.hash = '#/lobby'
+        SS.server.app.fbLogin {userId: response.authResponse.userID, accessToken: response.authResponse.accessToken}, ->
+          new LobbyView { userId: @userId, container: $("#content") }
       else
         console.log "Authentication failed"
     ), scope: "email"

@@ -17,6 +17,24 @@
   .game-state.active
     display block
 
+  a.button
+    color black
+    text-decoration none
+
+  a.button:hover
+    color white
+
+  .button
+    position relative
+    display inline-block
+
+  .button:hover
+    cursor pointer
+    color white
+
+  .button:active
+    top 1px
+
 #message
   text-align center
   font-size 18px
@@ -76,27 +94,6 @@
 #explanation
   border 1px solid #ccc
   background-color #fffae3
-
-a.button
-  color black
-  text-decoration none
-
-a.button:hover
-  color white
-
-.button
-  vertical-gradient(#0da5f4, #0a7cb8)
-  position relative
-  padding 10px 15px
-  border-radius 5px
-  display inline-block
-
-.button:hover
-  cursor pointer
-  color white
-
-.button:active
-  top 1px
 
 #players
   position absolute

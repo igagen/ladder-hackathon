@@ -15,6 +15,9 @@ class Store
     @hash[id] = obj
     id
 
+  destroy: (id) ->
+    delete @hash[id]
+
   get: (id) ->
     @hash[id]
 

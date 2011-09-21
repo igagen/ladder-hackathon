@@ -48,21 +48,19 @@ class Router extends Backbone.Router
       else
         new LoginView {container: $("#content")}
 
-  loadUser: (cb) ->
-    if @userId?
-      cb()
-    else
-      @userId = prompt 'Username:'
-      SS.server.app.login @userId, cb
-
   fbLoadUser: (cb) =>
-    FB.getLoginStatus (response) =>
+    # For some reason FB.getLoginStatus sometimes hangs and never fires the callback
+    timeout = setTimeout (-> cb(false)), 2000
+
+    FB.getLoginStatus ((response) =>
+      clearTimeout(timeout)
       if response.authResponse
         @userId = response.authResponse.userID
         @accessToken = response.authResponse.accessToken
         SS.server.app.fbLogin {userId: @userId, accessToken: @accessToken}, => cb(true)
       else
         cb(false)
+    ), true
 
 
 window.Router = Router
