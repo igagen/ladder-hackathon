@@ -5,15 +5,6 @@ class LobbyView extends Backbone.View
 
     @render()
 
-  fbLogin: =>
-    FB.login ((response) ->
-      if response.authResponse
-        SS.server.app.login response.authResponse, ->
-          console.log "Authentication complete"
-      else
-        console.log "Authentication failed"
-    ), scope: "email"
-
   render: ->
     template = $("#template-lobby")
     $(@el).html template.html()

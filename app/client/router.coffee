@@ -2,12 +2,16 @@ class Router extends Backbone.Router
   routes:
     "": "lobby"
     "/": "lobby"
+    "/login": "login"
     "/lobby": "lobby"
     "/solo": "solo"
     "/multi/:id": "multi"
     "/game/:id": "joinGame"
 
   # Routes
+
+  login: ->
+    new LoginView {container: $("#content")}
 
   lobby: ->
     @authenticate => new LobbyView { userId: @userId, container: $("#content") }
@@ -42,7 +46,6 @@ class Router extends Backbone.Router
       if authenticated
         action(params)
       else
-        alert 'Login'
         new LoginView {container: $("#content")}
 
   loadUser: (cb) ->

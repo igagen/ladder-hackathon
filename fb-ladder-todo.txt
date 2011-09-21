@@ -1,12 +1,7 @@
-MONDAY:
-  - clean up CSS ids to support numerical userids
-
 TODAY:
-  - fix points
-  - fix summary screen
+  - lobby styling
   - clean up dead games
   - underscore templates
-  - extract player view
   - make player, timer, game use templates to populate
 
 Major tasks:

@@ -1,2 +1,5 @@
 .socketstream_state
 *.swp
+dump.rdb
+nohup.out
+node_modules
