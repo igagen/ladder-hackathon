@@ -22,6 +22,8 @@ exports.Game = class Game
 
     @start() if @solo
 
+    console.log "Game.create(#{@userId1})"
+
     cb(@)
 
   lobbyData: ->
@@ -100,6 +102,7 @@ exports.Game = class Game
     @startTime = new Date()
 
   join: (userId2) ->
+    console.log "Game.join(#{userId2})"
     @player2 = new Player(userId2)
     @players[userId2] = @player2
     @publish { action: 'join', player2: @player2.playerData() }

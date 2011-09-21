@@ -37,6 +37,7 @@ class GameView extends Backbone.View
     @renderPlayers()
 
     SS.events.on "info", (message, channel) =>
+      console.log "Game info", message
       @[message.action](message)
 
     @$gameStates.hide()

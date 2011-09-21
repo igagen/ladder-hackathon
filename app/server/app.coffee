@@ -6,6 +6,7 @@ UserStore = Store.get("User")
 
 https = require("https")
 
+# Helpers
 
 getGame = (id) -> GameStore.get(id)
 
@@ -18,6 +19,8 @@ getFacebookUser = (userId, accessToken, cb) ->
     res.on "end", ->
       cb(JSON.parse(data))
 
+# Actions
+
 exports.actions =
   init: (cb) ->
     cb()
@@ -29,20 +32,24 @@ exports.actions =
     else
       new User userId, userId, => @session.setUserId userId, cb
 
-  fbLogin: (auth, cb) ->
-    # TODO: verify signed request
+  # TODO: Don't send access token to server, especially over a non-encrypted web socket connection
+  # The right way to do this is to capture the access token on the server from Facebook's
+  # signed request POST that gets sent on initial app load.
+  fbLogin: (params, cb) ->
+    console.log "fbLogin", params
 
-    user = UserStore.get(auth.user_id)
+    user = UserStore.get(params.userId)
     if user
-      @session.setUserId user.id, ->
-        @session.attributes = {accessToken: auth.accessToken}
-        @session.save cb
+      @saveUserSession params.userId, params.accessToken, cb
     else
-      getFacebookUser auth.userID, auth.accessToken, (facebookUser) =>
-        new User facebookUser.id, facebookUser.name, =>
-          @session.setUserId facebookUser.id, ->
-            @session.attributes = {accessToken: auth.accessToken}
-            @session.save cb
+      getFacebookUser params.userId, params.accessToken, (facebookUser) =>
+        new User params.userId, facebookUser.name, =>
+          @saveUserSession params.userId, params.accessToken, cb
+  
+  saveUserSession: (userId, accessToken, cb) ->
+    @session.setUserId userId, =>
+      @session.attributes = {accessToken: accessToken}
+      @session.save cb
 
   getGame: (id, cb) ->
     game = getGame(id)
@@ -85,9 +92,9 @@ exports.actions =
 
   joinSpecificTwoPlayerGame: (params, cb) ->
     game = getGame(params.gameId)
-    if game.isOpenForUser(params.userId)
+    if game.isOpenForUser(@session.user_id)
       @session.channel.subscribe("game/#{game.id}")
-      game.join(params.userId)
+      game.join(@session.user_id)
       cb(game.gameData())
     else
       # in case no players available, fall back to createTwoPlayerGame

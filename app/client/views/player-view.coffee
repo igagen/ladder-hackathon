@@ -7,7 +7,7 @@ class PlayerView
 
   render: =>
     @$playerDiv = $ """
-      <div id='#{@userId}'>
+      <div id='player-#{@userId}'>
       <p>
         <span class='name'>#{@userName}</span>: <span class='points'>0 pts</span>
       </p>
@@ -16,7 +16,7 @@ class PlayerView
     @$points = $(@$playerDiv.find(".points"))
     @$container.append @$playerDiv
 
-    @$answers = $("##{@userId} .answers") # TODO, scope this backbone view
+    @$answers = $("#player-#{@userId} .answers") # TODO, scope this backbone view
     for answer in @answers
       @appendAnswer(answer)
 
