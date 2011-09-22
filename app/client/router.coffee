@@ -14,7 +14,7 @@ class Router extends Backbone.Router
     new LoginView {container: $("#content")}
 
   lobby: ->
-    @authenticate => new LobbyView { userId: @userId, container: $("#content") }
+    @authenticate => new LobbyView {userId: @userId, container: $("#content")}
 
   solo: ->
     @authenticate =>
@@ -38,7 +38,7 @@ class Router extends Backbone.Router
   # Helpers
 
   game: (gameData) ->
-    new GameView { userId: @userId, gameData: gameData, container: $("#content") }
+    new GameView {userId: @userId, gameData: gameData, container: $("#content")}
 
   authenticate: (params, action) =>
     action = params unless action? # support calling with no params

@@ -100,15 +100,18 @@ exports.Game = class Game
     ra = Math.floor(ra + @K * (sa - ea))
     rb = Math.floor(rb + @K * (sb - eb))
 
+    @player1DeltaRating = ra - user1.rating
+    @player2DeltaRating = rb - user2.rating
+
     user1.rating = ra
     user2.rating = rb
 
   winLoseOrDraw: ->
     return "Good Job!" if @solo
     if @player1.points > @player2.points
-      "#{@player1.name} wins!"
+      "#{@player1.name()} Wins!"
     else if @player2.points > @player1.points
-      "#{@player2.name} wins!"
+      "#{@player2.name()} Wins!"
     else
       "Draw"
 
@@ -121,9 +124,15 @@ exports.Game = class Game
       action: 'finish'
       result: @winLoseOrDraw()
       player1:
+        id: @player1.id()
+        name: @player1.name()
         rating: @player1.rating()
+        deltaRating: @player1DeltaRating
       player2:
-        rating: @player2?.rating()
+        id: @player2.id()
+        name: @player2.name()
+        rating: @player2.rating()
+        deltaRating: @player2DeltaRating
 
   startTimer: () ->
     @startTime = new Date()
@@ -132,7 +141,7 @@ exports.Game = class Game
     console.log "Game.join(#{userId2})"
     @player2 = new Player(userId2)
     @players[userId2] = @player2
-    @publish { action: 'join', player2: @player2.playerData() }
+    @publish {action: 'join', player2: @player2.playerData()}
     @ready()
 
   exit: (userId) ->
@@ -152,7 +161,7 @@ exports.Game = class Game
     question = @questions[questionId]
     if SS.shared.questions.isCorrect(answer, question)
       points = player.answer(true)
-      @publish { action: 'answer', userId: userId, correct: true, points: player.points }
+      @publish {action: 'answer', userId: userId, correct: true, points: player.points}
     else
       points = player.answer(false)
-      @publish { action: 'answer', userId: userId, correct: false, points: player.points }
+      @publish {action: 'answer', userId: userId, correct: false, points: player.points}

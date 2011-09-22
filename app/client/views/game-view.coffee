@@ -18,6 +18,14 @@ class GameView extends Backbone.View
     @$answer = @.$("#answer")
 
     @$players = @.$("#players")
+    @$player1Img = @.$("#player1-image")
+    @$player2Img = @.$("#player2-image")
+    @$player1Name = @.$("#player1-summary .name")
+    @$player1Rating = @.$("#player1-summary .rating")
+    @$player1DeltaRating = @.$("#player1-summary .delta-rating")
+    @$player2Name = @.$("#player2-summary .name")
+    @$player2Rating = @.$("#player2-summary .rating")
+    @$player2DeltaRating = @.$("#player2-summary .delta-rating")
     @$advanceButton = @.$("#advance-button")
     @$gameStates= @.$(".game-state")
     @$open = @.$(".open")
@@ -51,7 +59,7 @@ class GameView extends Backbone.View
   join: (o) ->
     @game.player2 = o.player2
     @renderPlayers()
-    @displayMessage("#{@game.player2.userId} has joined!", "correct")
+    @displayMessage("#{@game.player2.name} has joined!", "correct")
 
   open: ->
     @$gameStates.hide()
@@ -76,12 +84,49 @@ class GameView extends Backbone.View
     SS.server.app.playerFinish { userId: @userId, gameId: @game.id }, (result) =>
 
   finish: (o) ->
+    return if @solo
+
     @$gameStates.hide()
     @$finished.show()
     @state = 'finish'
     @$result.html o.result
-    @.$("#player1-summary span").html(o.player1.rating)
-    @.$("#player2-summary span").html(o.player2.rating)
+
+    @$player1Img.attr('src', "http://graph.facebook.com/#{o.player1.id}/picture")
+    @$player2Img.attr('src', "http://graph.facebook.com/#{o.player2.id}/picture")
+    @$player1Name.html("#{o.player1.name}:")
+    @$player2Name.html("#{o.player2.name}:")
+    @$player1Rating.html(o.player1.rating - o.player1.deltaRating)
+    @$player2Rating.html(o.player2.rating - o.player2.deltaRating)
+    @$player1DeltaRating.html("#{if o.player1.deltaRating >= 0 then '+' else ''}#{o.player1.deltaRating}")
+    @$player2DeltaRating.html("#{if o.player2.deltaRating >= 0 then '+' else ''}#{o.player2.deltaRating}")
+
+    setTimeout (=>
+      @$player1DeltaRating.addClass('update')
+      if o.player1.deltaRating >= 0
+        @$player1Rating.addClass('positive')
+        @$player1DeltaRating.addClass('positive')
+      else
+        @$player1Rating.addClass('negative')
+        @$player1DeltaRating.addClass('negative')
+
+      
+      @$player2DeltaRating.addClass('update')
+      if o.player2.deltaRating >= 0
+        @$player2Rating.addClass('positive') 
+        @$player2DeltaRating.addClass('positive') 
+      else
+        @$player2Rating.addClass('negative')
+        @$player2DeltaRating.addClass('negative')
+
+      setTimeout (=>
+        @$player1Rating.html(o.player1.rating)
+        @$player1DeltaRating.removeClass('update')
+        # @$player1DeltaRating.addClass('hidden')
+        @$player2Rating.html(o.player2.rating)
+        @$player2DeltaRating.removeClass('update')
+        # @$player2DeltaRating.addClass('hidden')
+      ), 500
+    ), 1500
 
   # This handles a server broadcast of a player's answer.  It's slightly 
   # awkward that the server comes through here first.
@@ -107,7 +152,7 @@ class GameView extends Backbone.View
   renderPlayer: (player) ->
     container = @$players
     playerView = new PlayerView(container, player)
-    @playerViews[player.userId] = playerView
+    @playerViews[player.id] = playerView
   #############
 
   renderPlayers: ->

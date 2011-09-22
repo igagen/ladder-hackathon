@@ -1,7 +1,7 @@
 class PlayerView
   constructor: (@$container, player) ->
-    @userId = player.userId
-    @userName = player.userName
+    @userId = player.id
+    @userName = player.name
     @answers = player.answers
     @render()
 

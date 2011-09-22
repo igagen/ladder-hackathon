@@ -25,8 +25,19 @@
     .game-state.finish
       h2 Game Over!
 
-      p#player1-summary Player 1: <span></span> 
-      p#player2-summary Player 2: <span></span>
+      img#player1-image
+      #player1-summary.player-summary
+        span.name Player 1:
+        span.rating
+        .delta-rating
+
+      img#player2-image
+      #player2-summary.player-summary
+        span.name Player 2:
+        span.rating
+        .delta-rating
+
+      a.button(href = "#/multi/join") Play Again
       a.button(href = "#/lobby") Lobby
 
   #players
