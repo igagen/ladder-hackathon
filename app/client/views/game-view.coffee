@@ -125,7 +125,7 @@ class GameView extends Backbone.View
         @$player2Rating.html(o.player2.rating)
         @$player2DeltaRating.removeClass('update')
         # @$player2DeltaRating.addClass('hidden')
-      ), 500
+      ), 400
     ), 1500
 
   # This handles a server broadcast of a player's answer.  It's slightly 
