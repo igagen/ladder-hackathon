@@ -7,7 +7,223 @@ join = (arr) ->
     last = arr.pop()
     "#{arr.join ", "}, and #{last}"
 
+fraction = (n, d) ->
+  "{ #{n} \\over #{d} }"
+
 exports.questionTemplates = [
+  {
+    description: "Word Problems (Marbles)"
+    stimulus:
+      '''
+      A jar contains red, white, and blue marbles.  There are [[ red ]]
+      red marbles.  There are \\( 1/[[ wr ]] \\) as many white marbles as
+      blue marbles.  \\( 1/[[ br ]] \\) of all the marbles are blue.  How
+      many marbles are there?
+      '''
+    explanation:
+      '''
+      Let n = the total number of marbles, and use r, w, and b to represent
+      the number of red, white, and blue marbles.  Start by translating the
+      facts we know:
+      
+        $$ n = r + w + b $$
+        $$ r = [[ red ]] $$
+        $$ w = [[ fraction(1, wr) ]]b $$
+        $$ b = [[ fraction(1, br) ]]n $$
+        
+      We want to solve for n, and eliminate other variables.  Start by substituting
+      for r, w, and b in the first equation:
+      
+        $$ n = [[ red ]] + [[ fraction(1, wr) ]]b + [[ fraction(1, br) ]]n $$
+      
+      We still need to eliminate \\( b \\), so we use \\( b = [[ fraction(1, br) ]]n \\):
+      
+        $$ n = [[ red ]] + [[ fraction(1, wr) ]]([[ fraction(1, br) ]]n) + [[ fraction(1, br) ]]n $$
+        $$ n - {1 \\over [[ wr*br ]] }n - {1 \\over [[ br ]] }n = [[ red ]] $$ 
+        $$ n * (1 - {1 \\over [[ wr*br ]] } - {1 \\over [[ br ]] }) = [[ red ]] $$ 
+        $$ n * ([[ frac1 ]] - [[ frac2 ]] - [[ frac3 ]]) = [[ red ]] $$
+        $$ n * [[ frac_sum ]] = [[ red ]] $$
+        $$ n = [[ inverse_frac_sum ]] * [[ red ]] = [[ wr*br ]] * [[ red / (wr*br - wr - 1) ]] = [[ correctAnswer ]] $$
+        
+      (FYI, the breakdown of marbles is [[ red ]] red, [[ white ]] white, and [[ blue ]] blue.)
+      '''
+    variations: ->
+      # use coprime tuples whose product < 100
+      parameterizations = [
+        {wr: 3, br: 4}
+        {wr: 3, br: 5}
+        {wr: 3, br: 7}
+        {wr: 4, br: 5}
+        {wr: 4, br: 7}
+        {wr: 5, br: 6}
+      ]
+      for p in parameterizations
+        wr = p.wr
+        br = p.br
+        p.minAnswer = p.wr * br
+        p.n = p.correctAnswer = Math.floor(100 / p.minAnswer) * p.minAnswer
+        p.blue = p.correctAnswer / br
+        p.white = p.blue / wr
+        p.red = p.n - (p.white + p.blue)
+        p.frac1 = fraction(wr*br, wr*br)
+        p.frac2 = fraction(1, wr*br)
+        p.frac3 = fraction(wr, wr*br)
+        p.frac_sum = fraction(wr*br - wr - 1, wr*br)
+        p.inverse_frac_sum = fraction(wr*br, wr*br - wr - 1)
+        p.fraction = fraction
+        p
+  },
+
+  {
+    description: "Function Composition"
+    stimulus:
+      '''
+      Let the function h be defined as \\( h(x) = x^2 + [[ c ]] \\). If y is a positive number
+      in which \\( h([[ n ]]y) = [[ n ]]h(y) \\), what is the value of y?
+      '''
+    explanation:
+      '''
+        Apply the definition of h(x) to both sides of the second equation:
+        
+          $$ h(x) = x^2 + [[ c ]] $$
+          $$ h([[ n ]]y) = [[ n ]]h(y) $$
+          $$ ([[ n ]]y)^2 + [[ c ]] = [[ n ]](y^2 + [[ c ]]) $$
+          
+        Solve for y, avoiding unnecessary multiplication by dividing both sides by [[ n ]]
+        early in the process:
+
+          $$ ([[ n ]] * [[ n ]])y^2 + [[ c ]] = [[ n ]]y^2 + [[ n ]] * [[ c ]] $$
+          $$ [[ n ]]y^2 + { [[ c ]] \\over [[ n ]] } = y^2 + [[ c ]] $$
+          $$ [[ n ]]y^2 + [[ c / n ]] = y^2 + [[ c ]] $$
+          $$ [[ n - 1]]y^2 = [[ c ]] - [[ c / n ]] = [[ c - c/n ]] $$
+          $$ y^2 = { [[ c - c/n ]] \\over [[ n - 1 ]] } = [[ (c - c/n) / (n - 1) ]]$$
+          $$ y = [[ correctAnswer ]] $$
+        
+      '''
+    variations: ->
+      parameterizations = [
+        {correctAnswer: 3, n: 7}
+        {correctAnswer: 4, n: 3}
+        {correctAnswer: 5, n: 4}
+        {correctAnswer: 6, n: 5}
+      ]
+      for p in parameterizations
+        p.c = (p.correctAnswer * p.correctAnswer) * p.n
+        p.c_over_n = p.c / p.n
+        p
+  },
+  
+  {
+    description: "Percentages"
+    stimulus:
+      '''
+      If [[ small ]]% of a = b% of [[ big ]] and \\( b > 0 \\), what is the value of \\( a \\over b \\)?
+      '''
+    explanation:
+      '''
+      Set up the equation, multiply by 100 to simplify the arithmetic, then solve for \\( a \\over b \\).
+      
+        $$ ([[ small ]]\\%) * a = (b\\%) * [[ big ]] $$
+        $$ { [[ small ]] \\over 100} * a = { b \\over 100} * [[ big ]] $$
+        $$ [[ small ]] * a = b * [[ big ]] $$
+        $$ a = b * { [[ big ]] \\over [[small]] } $$
+        $$ { a \\over b } = { [[ big ]] \\over [[small]] } = [[ correctAnswer ]] $$
+      '''
+    variations: ->
+      parameterizations = [
+        {small: 45, correctAnswer: 2}
+        {small: 15, correctAnswer: 6}
+        {small: 22, correctAnswer: 4}
+        {small: 12, correctAnswer: 7}
+      ]
+      for p in parameterizations
+        p.big = p.small * p.correctAnswer
+        p
+  },
+  
+  {
+    description: "Exponents"
+    stimulus:
+      '''
+      If \\( a ^ [[ var1 ]] * a ^ [[ var1 ]] = a ^ { [[ val1_times_2 ]] } \\)
+      and \\( (a ^ { [[ e ]] } ) ^ { [[ var2 ]] } = a ^ { [[ val2_times_e ]] } \\), what is the 
+      value of \\( [[ var1 ]] - [[ var2 ]] \\)?
+      '''
+    explanation:
+      '''
+      This is really two problems in one.  First, solve each problem separately.
+    
+      Solve for [[ var1 ]] first, using the property that multiplying powers of the same
+      base is equivalent to adding the exponents.
+    
+        $$ a ^ [[ var1 ]] * a ^ [[ var1 ]] = a ^ { [[ val1_times_2 ]] } $$
+        $$ a ^ { [[ var1 ]] + [[ var1 ]] } = a ^ { [[ val1_times_2 ]] } $$
+        $$ [[ var1 ]] + [[ var1 ]] = [[ val1_times_2 ]] $$
+        $$ [[ var1 ]] = [[ val1 ]] $$
+        
+      Now solve for [[ var2 ]], using the property that taking a power to another power is
+      equivalent to multiplying the exponents:
+      
+        $$ (a ^ { [[ e ]] } ) ^ { [[ var2 ]] } = a ^ { [[ val2_times_e ]] } $$
+        $$ a ^ { [[ e ]] * [[ var2 ]] } = a ^ { [[ val2_times_e ]] } $$
+        $$ [[ e ]] * [[ var2 ]] = [[ val2_times_e ]] $$
+        $$ [[ var2 ]] = [[ val2 ]] $$
+        
+      Since \\( [[ var1 ]] = [[ val1 ]] \\) and \\( [[ var2 ]] = [[ val2 ]] \\):
+      
+        $$ [[ var1 ]] - [[ var2 ]] = [[ correctAnswer ]] $$
+
+      '''
+    variations: ->
+      parameterizations = [
+        {var1: "x", var2: "y", val1: 5, val2: 2, e: 7}
+        {var1: "x", var2: "y", val1: 15, val2: 8, e: 3}
+        {var1: "x", var2: "y", val1: 12, val2: 6, e: -2}
+        {var1: "m", var2: "n", val1: 8, val2: 3, e: 5}
+      ]
+      for p in parameterizations
+        p.val1_times_2 = p.val1 * 2
+        p.val2_times_e = p.val2 * p.e
+        p.correctAnswer =  p.val1 - p.val2
+        p
+  },
+ 
+  {
+    description: "Fractions"
+    stimulus: '''
+      On a hot summer day, [[ person ]] sold [[ n ]] cups of lemonade. 
+      [[ Pronoun]] sold \\( [[ a ]] \\) of the lemonade before lunch, 
+      \\( [[ b ]] \\) during lunch, \\( [[ c ]] \\) in the afternoon, 
+      and the remaining cups in the evening. How many cups did [[ person ]] sell in the evening?  
+      '''
+    explanation: '''
+      Start by computing the number of cups sold in each slot other than the evening:
+      
+        $$ ([[ a ]] * [[ n ]]) + ([[ b ]] * [[ n ]]) + ([[ c ]] * [[ n ]]) = $$
+        $$ [[ sold1 ]] + [[ sold2 ]] + [[ sold3 ]]= $$
+        $$ [[ sold_before_dinner ]] $$
+        
+      Then, we know that [[ person ]] sold all the remaining cups during the evening:
+      
+        $$ [[ n ]] - [[ sold_before_dinner ]] = [[ correctAnswer ]] $$
+      '''
+    variations: ->
+      parameterizations = [
+        {aa: 8, bb: 7, cc: 4, n: 56, person: "Mary", Pronoun: "She"}
+        {aa: 3, bb: 5, cc: 15, n: 45, person: "James", Pronoun: "He"}
+      ]
+      for p in parameterizations
+        p.a = "{ 1 \\over #{p.aa} }"
+        p.b = "{ 1 \\over #{p.bb} }"
+        p.c = "{ 1 \\over #{p.cc} }"
+        p.sold1 = p.n / p.aa
+        p.sold2 = p.n / p.bb
+        p.sold3 = p.n / p.cc
+        p.sold_before_dinner = p.sold1 + p.sold2 + p.sold3
+        p.correctAnswer = p.n - p.sold_before_dinner
+        p
+  },
+  
   {
     description: "Algebra: One Variable"
     stimulus: '''
@@ -29,6 +245,8 @@ exports.questionTemplates = [
     variations: ->
       parameterizations = [
         {var_name: "x", v: 4, a: 3, b: 7, d: 2, e: 5}
+        {var_name: "m", v: 3, a: 4, b: 8, d: 4, e: 7}
+        {var_name: "n", v: 5, a: 5, b: 9, d: 2, e: 9}
         {var_name: "y", v: 2, a: 7, b: 11, d: 3, e: 2}
       ]
       for p in parameterizations
