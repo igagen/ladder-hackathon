@@ -7,7 +7,7 @@ exports.Game = class Game
   NUM_QUESTIONS: 50
   K: 24
 
-  constructor: (@userId1, @min, @max, @duration, @solo, cb) ->
+  constructor: (@userId1, @duration, @solo, cb) ->
     @questions = new Array(@NUM_QUESTIONS)
     
     @ratings = {}

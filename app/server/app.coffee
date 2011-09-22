@@ -72,12 +72,12 @@ exports.actions =
       cb({ error: "Invalid game ID: #{params.gameId}" })
 
   createSoloGame: (userId, cb) ->
-    new Game userId, 3, 29, 30, true, (game) =>
+    new Game userId, 300, true, (game) =>
       @session.channel.subscribe("game/#{game.id}")
       cb(game.gameData())
 
   createTwoPlayerGame: (userId, cb) ->
-    new Game userId, 3, 29, 30, false, (game) =>
+    new Game userId, 300, false, (game) =>
       @session.channel.subscribe("game/#{game.id}")
       cb(game.gameData())
 
