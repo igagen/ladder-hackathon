@@ -24,3 +24,6 @@ exports.Player = class Player
     answers: @answers
     points: @points
     rating: @user.rating
+
+  rating: ->
+    @user.rating

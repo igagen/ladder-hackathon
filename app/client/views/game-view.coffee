@@ -37,7 +37,6 @@ class GameView extends Backbone.View
     @renderPlayers()
 
     SS.events.on "info", (message, channel) =>
-      console.log "Game info", message
       @[message.action](message)
 
     @$gameStates.hide()
@@ -81,6 +80,8 @@ class GameView extends Backbone.View
     @$finished.show()
     @state = 'finish'
     @$result.html o.result
+    @.$("#player1-summary span").html(o.player1.rating)
+    @.$("#player2-summary span").html(o.player2.rating)
 
   # This handles a server broadcast of a player's answer.  It's slightly 
   # awkward that the server comes through here first.

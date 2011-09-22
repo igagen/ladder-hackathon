@@ -1,9 +1,11 @@
 GameStore = require("./store").get("Game")
+UserStore = require("./store").get("User")
 {Player} = require("./player")
 Questions = require("./questions")
 
 exports.Game = class Game
   NUM_QUESTIONS: 50
+  K: 24
 
   constructor: (@userId1, @min, @max, @duration, @solo, cb) ->
     @questions = new Array(@NUM_QUESTIONS)
@@ -49,7 +51,6 @@ exports.Game = class Game
   playerFinish: (userId) ->
     player = @players[userId]
     player.finished = true
-    # WRONG
     if @player1.finished && (@solo || @player2.finished)
       @finish()
 
@@ -120,9 +121,9 @@ exports.Game = class Game
       action: 'finish'
       result: @winLoseOrDraw()
       player1:
-        rating: @player1.rating
+        rating: @player1.rating()
       player2:
-        rating: @player2?.rating
+        rating: @player2?.rating()
 
   startTimer: () ->
     @startTime = new Date()

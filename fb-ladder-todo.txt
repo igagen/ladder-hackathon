@@ -37,7 +37,8 @@ Major tasks:
       - dividing into leagues?
       - show leaderboard on lobby
 
-    client-side templating
+    layout
+      - liquid layout
 
 
   CONTENT:
