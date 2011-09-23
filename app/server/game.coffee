@@ -45,6 +45,8 @@ exports.Game = class Game
   playerStart: (userId) ->
     player = @players[userId]
     player.started = true
+    console.log "game.playerStart(#{userId})"
+    console.log @players
     if @player1.started && @player2.started
       @start()
 
@@ -55,16 +57,21 @@ exports.Game = class Game
       @finish()
 
   publish: (data) ->
-    SS.publish.channel "game/#{@id}", "info", data
+    channel = "game/#{@id}"
+
+    console.log "Publishing 'info' message on channel #{channel}"
+    console.log data
+
+    SS.publish.channel channel, "info", data
 
   ready: ->
     @state = 'ready'
     @publish { action: 'ready' }
 
   start: ->
+    console.log "game.start"
     @state = 'start'
-    @startTimer()
-    @publish { action: 'start', startTime: @startTime }
+    @publish {action: 'start'}
 
   # Update both players ratings based on match results
   # sa, sb are the outcome values from this player's perspective (sa) and the opponents perspective (sb)
@@ -118,7 +125,9 @@ exports.Game = class Game
   finish: ->
     @state = 'finish'
 
-    @updateRatings() unless @solo
+    return if @solo
+
+    @updateRatings()
 
     @publish
       action: 'finish'
@@ -133,9 +142,6 @@ exports.Game = class Game
         name: @player2.name()
         rating: @player2.rating()
         deltaRating: @player2DeltaRating
-
-  startTimer: () ->
-    @startTime = new Date()
 
   join: (userId2) ->
     console.log "Game.join(#{userId2})"

@@ -55,14 +55,22 @@ exports.actions =
     cb(gameData)
 
   playerStart: (params, cb) ->
+    console.log "playerStart", params
     game = getGame(params.gameId)
+    console.log "game:", game
     if game?
       game.playerStart params.userId
+      cb({success: "Player #{params.userId} started game #{params.gameId}"})
+    else
+      cb({error: "Couldn't find game with id: #{params.gameId}"})
 
   playerFinish: (params, cb) ->
     game = getGame(params.gameId)
     if game?
       game.playerFinish params.userId
+      cb({success: "Player #{params.userId} finished game #{params.gameId}"})
+    else
+      cb({error: "Couldn't find game with id: #{params.gameId}"})
 
   answer: (params, cb) ->
     game = getGame(params.gameId)
@@ -77,6 +85,7 @@ exports.actions =
       cb(game.gameData())
 
   createTwoPlayerGame: (userId, cb) ->
+    console.log "createTwoPlayerGame:", userId
     new Game userId, 3, 29, 30, false, (game) =>
       @session.channel.subscribe("game/#{game.id}")
       cb(game.gameData())
@@ -92,6 +101,7 @@ exports.actions =
       @createTwoPlayerGame(params.userId, cb)
 
   autoJoinTwoPlayerGame: (userId, cb) ->
+    console.log "autoJoinTwoPlayerGame:", userId
     for game in GameStore.all() when game.isOpenForUser(userId)
       @session.channel.subscribe("game/#{game.id}")
       game.join(userId)

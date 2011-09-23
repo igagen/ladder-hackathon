@@ -1,4 +1,6 @@
 class GameView extends Backbone.View
+  id: 'game'
+
   events:
     "click #advance-button": "handleAdvance"
     "click .start.button": "playerStart"
@@ -45,7 +47,14 @@ class GameView extends Backbone.View
     @renderPlayers()
 
     SS.events.on "info", (message, channel) =>
-      @[message.action](message)
+      console.log "GameView #{@game.id} received message on #{channel}"
+      console.log message
+
+      if channel == "game/#{@game.id}"
+        console.log "Handling game message"
+        @[message.action](message)
+      else
+        console.log "Received game message for wrong game id: #{channel}, should be: #{@game.id}"
 
     @$gameStates.hide()
     @.$(".#{@game.state}").show()
@@ -78,13 +87,18 @@ class GameView extends Backbone.View
     @state = 'start'
 
   playerStart: ->
+    console.log "begin playerStart"
     SS.server.app.playerStart { userId: @userId, gameId: @game.id }, (result) =>
+      console.log "end playerStart:", result
 
   playerFinish: =>
+    return if @solo
     SS.server.app.playerFinish { userId: @userId, gameId: @game.id }, (result) =>
 
   finish: (o) ->
     return if @solo
+
+    console.log "Finished game", o
 
     @$gameStates.hide()
     @$finished.show()
@@ -103,18 +117,22 @@ class GameView extends Backbone.View
     setTimeout (=>
       @$player1DeltaRating.addClass('update')
       if o.player1.deltaRating >= 0
+        console.log "Player 1 gained rank"
         @$player1Rating.addClass('positive')
         @$player1DeltaRating.addClass('positive')
       else
+        console.log "Player 1 lost rank"
         @$player1Rating.addClass('negative')
         @$player1DeltaRating.addClass('negative')
 
       
       @$player2DeltaRating.addClass('update')
       if o.player2.deltaRating >= 0
+        console.log "Player 2 gained rank"
         @$player2Rating.addClass('positive') 
         @$player2DeltaRating.addClass('positive') 
       else
+        console.log "Player 2 lost rank"
         @$player2Rating.addClass('negative')
         @$player2DeltaRating.addClass('negative')
 
@@ -141,6 +159,8 @@ class GameView extends Backbone.View
     #########
     
   render: ->
+    console.log "Rendering game view for game:", @game.id
+
     template = $("#template-game")
     $(@el).html template.html()
     @$container.html('')

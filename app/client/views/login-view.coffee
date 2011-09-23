@@ -1,4 +1,6 @@
 class LoginView extends Backbone.View
+  id: 'login'
+
   initialize: (options) ->
     @$container = options.container
 

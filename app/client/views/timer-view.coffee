@@ -32,6 +32,7 @@ class TimerView # extends Backbone.View
       @$seconds.html("00")
       @$timer.addClass('finished')
       clearInterval @timerInterval
+      console.log "TimerView#{@id} finished"
       @playerFinish()
 
 window.TimerView = TimerView

@@ -11,10 +11,11 @@ class Router extends Backbone.Router
   # Routes
 
   login: ->
-    new LoginView {container: $("#content")}
+    @setView => new LoginView {container: $("#content")}
 
   lobby: ->
-    @authenticate => new LobbyView {userId: @userId, container: $("#content")}
+    @authenticate =>
+      @setView => new LobbyView {userId: @userId, container: $("#content")}
 
   solo: ->
     @authenticate =>
@@ -22,12 +23,15 @@ class Router extends Backbone.Router
         @game(gameData)
 
   multi: (id) ->
+    console.log "route #/multi/#{id}"
+
     @authenticate id, =>
       if id == "new"
         SS.server.app.createTwoPlayerGame @userId, (gameData) =>
           @game(gameData)
       else if id == "join"
         SS.server.app.autoJoinTwoPlayerGame @userId, (gameData) =>
+          console.log "joining:", gameData
           @game(gameData)
 
   joinGame: (id) ->
@@ -37,8 +41,14 @@ class Router extends Backbone.Router
 
   # Helpers
 
+  setView: (viewFunc) ->
+    if @currentView?
+      @currentView.remove()
+      delete @currentView
+    @currentView = viewFunc()
+
   game: (gameData) ->
-    new GameView {userId: @userId, gameData: gameData, container: $("#content")}
+    @setView => new GameView {userId: @userId, gameData: gameData, container: $("#content")}
 
   authenticate: (params, action) =>
     action = params unless action? # support calling with no params
