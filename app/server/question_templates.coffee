@@ -199,7 +199,7 @@ exports.questionTemplates = [
     explanation: '''
       Start by computing the number of cups sold in each slot other than the evening:
       
-        $$ ([[ a ]] * [[ n ]]) + ([[ b ]] * [[ n ]]) + ([[ c ]] * [[ n ]]) = $$
+        $$ ([[ a ]])([[ n ]]) + ([[ b ]])([[ n ]]) + ([[ c ]])([[ n ]]) = $$
         $$ [[ sold1 ]] + [[ sold2 ]] + [[ sold3 ]]= $$
         $$ [[ sold_before_dinner ]] $$
         
@@ -210,7 +210,7 @@ exports.questionTemplates = [
     variations: ->
       parameterizations = [
         {aa: 8, bb: 7, cc: 4, n: 56, person: "Mary", Pronoun: "She"}
-        {aa: 3, bb: 5, cc: 15, n: 45, person: "James", Pronoun: "He"}
+        {aa: 3, bb: 5, cc: 15, n: 45, person: "Christopher", Pronoun: "He"}
       ]
       for p in parameterizations
         p.a = "{ 1 \\over #{p.aa} }"
