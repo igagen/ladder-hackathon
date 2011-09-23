@@ -1,6 +1,5 @@
 class TimerView # extends Backbone.View
   constructor: (gameView, @duration, @playerFinish) ->
-    @duration = 15
     @$timer = gameView.$("#timer")
     @$minutes = gameView.$("#timer .minutes")
     @$seconds = gameView.$("#timer .seconds")
