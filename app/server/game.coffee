@@ -33,14 +33,15 @@ exports.Game = class Game
     id: @id
     state: @state
     solo: @solo
+    player1: @player1.lobbyData()
 
   gameData: ->
     id: @id
     duration: @duration
     state: @state
     questions: @questions
-    player1: @player1.playerData()
-    player2: @player2?.playerData()
+    player1: @player1.gameData()
+    player2: @player2?.gameData()
 
   playerStart: (userId) ->
     player = @players[userId]
@@ -147,7 +148,7 @@ exports.Game = class Game
     console.log "Game.join(#{userId2})"
     @player2 = new Player(userId2)
     @players[userId2] = @player2
-    @publish {action: 'join', player2: @player2.playerData()}
+    @publish {action: 'join', player2: @player2.gameData()}
     @ready()
 
   exit: (userId) ->

@@ -52,6 +52,7 @@ exports.actions =
 
   getOpenTwoPlayerGames: (cb) ->
     gameData = (game.lobbyData() for game in GameStore.all() when game.isOpen())
+    console.log "getOpenTwoPlayerGames:", gameData
     cb(gameData)
 
   playerStart: (params, cb) ->
@@ -80,14 +81,14 @@ exports.actions =
       cb({ error: "Invalid game ID: #{params.gameId}" })
 
   createSoloGame: (userId, cb) ->
-    new Game userId, 300, true, (game) =>
+    new Game userId, 60, true, (game) =>
       @session.channel.subscribe("game/#{game.id}")
       cb(game.gameData())
 
   createTwoPlayerGame: (userId, cb) ->
 
     console.log "createTwoPlayerGame:", userId
-    new Game userId, 300, false, (game) =>
+    new Game userId, 60, false, (game) =>
       @session.channel.subscribe("game/#{game.id}")
       cb(game.gameData())
 

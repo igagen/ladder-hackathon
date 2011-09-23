@@ -22,8 +22,12 @@ class LobbyView extends Backbone.View
       for gameData in games
         @$gamesElem.append("""
           <div class='game'>
-          <h2>#{gameData.state}</h2>
-          <a href='/#/game/#{gameData.id}'>Join Game</a>
+            <img src='http://graph.facebook.com/#{gameData.player1.id}/picture' />
+            <div class='join-container'>
+              <a class='join button' href='/#/game/#{gameData.id}'>Join Challenge</a>
+              <div class='player'>#{gameData.player1.name} (#{gameData.player1.rating})</div>
+            </div>
+            <div class='clear' />
           </div>
           """)
 

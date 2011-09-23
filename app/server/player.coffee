@@ -17,7 +17,12 @@ exports.Player = class Player
       @points = 0 if @points < 0
     @points
 
-  playerData: ->
+  lobbyData: ->
+    id: @id()
+    name: @name()
+    rating: @rating()
+
+  gameData: ->
     id: @id()
     name: @name()
     rating: @rating()
