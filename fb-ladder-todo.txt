@@ -1,11 +1,22 @@
 TODO:
 
   - live update lobby
-  - top players
-  - fix solo
+  * solo results
+  - spr input improvements
+  - multiple choice
+  - solo challenges
+  - info text?
+  - wait/ready screen
   - custom OG beat actions
   - bronze/silver/gold league achievements
+  - split players by league
+  - chat
   - unsubscribe channels
-  - randomize questions
+  * randomize questions
   - solo challenges
   - requests / invites
+  * persistence
+
+BUGS:
+  * infinite playerFinish
+  * IE? initial signup did not rerender game, blank screen after refresh

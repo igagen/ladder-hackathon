@@ -52,9 +52,11 @@ exports.actions =
 
   getLobbyData: (cb) ->
     openGames = (game.lobbyData() for game in GameStore.all() when game.isOpen())
+    topPlayers = UserStore.all().sort (user1, user2) -> user2.rating - user1.rating
+    topPlayers.length = 10 if topPlayers.length > 10
     lobbyData =
       openGames: openGames
-      topPlayers: UserStore.all()
+      topPlayers: topPlayers
     console.log "getLobbyData:", lobbyData
     cb(lobbyData)
 
