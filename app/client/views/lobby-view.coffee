@@ -13,23 +13,32 @@ class LobbyView extends Backbone.View
     @$container.html('')
     @$container.prepend(@el)
 
-    @$gamesElem = @.$("#games")
+    @$games = @.$("#games")
+    @$leaders = @.$("#leaders ol")
 
     @$fbLogin = @.$("#fb-login")
     @$fbLogin.bind 'click', @fbLogin
 
-    SS.server.app.getOpenTwoPlayerGames (games) =>
-      for gameData in games
-        @$gamesElem.append("""
+    SS.server.app.getLobbyData (lobbyData) =>
+      for game in lobbyData.openGames
+        @$games.append("""
           <div class='game'>
-            <img src='http://graph.facebook.com/#{gameData.player1.id}/picture' />
+            <img src='http://graph.facebook.com/#{game.player1.id}/picture' />
             <div class='join-container'>
-              <a class='join button' href='/#/game/#{gameData.id}'>Join Challenge</a>
-              <div class='player'>#{gameData.player1.name} (#{gameData.player1.rating})</div>
+              <a class='join button' href='/#/game/#{game.id}'>Join Challenge</a>
+              <div class='player'>#{game.player1.name} (#{game.player1.rating})</div>
             </div>
             <div class='clear' />
           </div>
           """)
+
+      for player in lobbyData.topPlayers
+        @$leaders.append("""
+          <li class='player'>
+            <img class='avatar' src="http://graph.facebook.com/#{player.id}/picture" />
+            <span>#{player.rating}</span> - #{player.name}
+          </li>
+        """)
 
 
 window.LobbyView = LobbyView

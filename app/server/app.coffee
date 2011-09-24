@@ -50,10 +50,13 @@ exports.actions =
     else
       cb { error: "No game with id '#{id}'" }
 
-  getOpenTwoPlayerGames: (cb) ->
-    gameData = (game.lobbyData() for game in GameStore.all() when game.isOpen())
-    console.log "getOpenTwoPlayerGames:", gameData
-    cb(gameData)
+  getLobbyData: (cb) ->
+    openGames = (game.lobbyData() for game in GameStore.all() when game.isOpen())
+    lobbyData =
+      openGames: openGames
+      topPlayers: UserStore.all()
+    console.log "getLobbyData:", lobbyData
+    cb(lobbyData)
 
   playerStart: (params, cb) ->
     console.log "playerStart", params
@@ -69,8 +72,10 @@ exports.actions =
     game = getGame(params.gameId)
     if game?
       game.playerFinish params.userId
+      console.log "Player #{params.userId} finished game #{params.gameId}"
       cb({success: "Player #{params.userId} finished game #{params.gameId}"})
     else
+      console.log "Couldn't find game with id: #{params.gameId}" 
       cb({error: "Couldn't find game with id: #{params.gameId}"})
 
   answer: (params, cb) ->

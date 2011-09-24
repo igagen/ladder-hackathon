@@ -1,62 +1,11 @@
-TODAY:
-  - lobby styling
-  - clean up dead games
-  - underscore templates
-  - make player, timer, game use templates to populate
+TODO:
 
-Major tasks:
-
-
-  INTEGRATION:
-    with Grockit
-
-  GAME:
-    lobby
-      - who's playing
-      - styling
-      - live update games
-
-    refresh
-      - hash tags
-      - verify answer bars, etc.
-
-    FB integration
-      - use FB login and username
-
-    exit/disconnect/cleanup
-      - exiting
-        - unsubscribe
-        - count win/loss
-        - clean up game?
-
-      - update lobby
-      - put timer back
-
-    ladder mechanics
-      - matching players of similar rank
-      - dividing into leagues?
-      - show leaderboard on lobby
-
-    layout
-      - liquid layout
-
-
-  CONTENT:
-    question loader: progression from easy to hard
-    figure out way to template questions
-
-  DEPLOY:
-    upgrade socketstream
-    ssl
-    finish event looping infinitely
-
-  ISSUES:
-    fix points
-
-PROBLEM: Facebook apps send POST request w/info we need for SS app, no hook yet
-
-OPTIONS:
-  hack server module (ugly, forks): works
-  write our own proxy: works, but lame
-  nginx POST to separate app that writes to redis: lame, because we want @session directly
-  we punt on FB usernames and just let people have their own userid for the game
+  - live update lobby
+  - top players
+  - fix solo
+  - custom OG beat actions
+  - bronze/silver/gold league achievements
+  - unsubscribe channels
+  - randomize questions
+  - solo challenges
+  - requests / invites

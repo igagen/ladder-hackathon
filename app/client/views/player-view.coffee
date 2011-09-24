@@ -9,10 +9,8 @@ class PlayerView
     @$playerDiv = $ """
       <div id='player-#{@userId}' class='player'>
         <img src="http://graph.facebook.com/#{@userId}/picture" />
-        <p>
-          <span class='name'>#{@userName}</span>: <span class='points'>0 pts</span>
-        </p>
-      <div class='answers' />
+        <div class='answers' />
+        <p><span class='name'>#{@userName}</span>: <span class='points'>0 pts</span></p>
       </div>"""
     @$points = $(@$playerDiv.find(".points"))
     @$container.append @$playerDiv

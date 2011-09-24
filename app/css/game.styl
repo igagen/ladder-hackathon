@@ -1,6 +1,10 @@
 #game
+  padding-top 10px
   -webkit-user-select none
   -moz-user-select none
+
+  .MathJax_Display
+    margin 7px 0
 
   input
     padding 0 10px
@@ -13,6 +17,7 @@
       padding 20px
       border-radius 5px
       border 1px solid #ccc
+      display none
 
   .game-state.active
     display block
@@ -37,6 +42,10 @@
       margin 15px
       width 125px
       text-align center
+
+    .player
+      width 130px
+      font-size 35px
 
     .player-summary
       height 40px
@@ -78,6 +87,18 @@
     
     .hidden
       opacity 0
+
+  .player
+    img
+      float left
+      width 30px
+      height 30px
+      margin-right 10px
+    
+    p
+      position relative
+      top 5px
+      left 0
 
 #message
   text-align center
@@ -126,14 +147,11 @@
 #advance-button:active
   top -5px
 
-#answer
-  width 130px
-  font-size 35px
-
 #stimulus, #explanation
-  width 400px
+  width 500px
   margin 10px
-  padding 10px
+  padding 7px
+  font-size 13px
 
 #explanation
   border 1px solid #ccc
@@ -141,13 +159,22 @@
 
 #players
   position absolute
-  bottom 0
-  min-height 100px
+  bottom 5px
   width 100%
 
+  img
+    width 30px
+    height 30px
+
+
+  .player
+    position relative
+
   p
-    text-align left
-    font-size 15px
+    position absolute
+    top 2px
+    left 36px
+    font-size 12px
     font-weight bold
     padding 15px 0 5px
 
@@ -157,23 +184,26 @@
     -webkit-transform scale(2.5)
     -moz-transform scale(2.5)
 
+  .answers
+    margin-top 2px
+
   .response
     display inline-block
     float left
-    width 20px
-    height 20px
-    border 2px solid black
+    width 12px
+    height 12px
+    border 1px solid black
     border-left-width 0
     box-shadow(1px 1px 6px #333)
 
   .response:first-child
-    border-top-left-radius 5px
-    border-bottom-left-radius 5px
-    border-left-width 2px
+    border-top-left-radius 3px
+    border-bottom-left-radius 3px
+    border-left-width 1px
 
   .response:last-child
-    border-top-right-radius 5px
-    border-bottom-right-radius 5px
+    border-top-right-radius 3px
+    border-bottom-right-radius 3px
 
 .correct
   vertical-gradient(#0ecc00, #098600)
@@ -183,17 +213,3 @@
 
 #message
   padding 10px
-
-.player
-  img
-    float left
-    width 30px
-    height 30px
-  
-  p
-    position relative
-    top -7px
-    left 13px
-  
-  .answers
-    min-height 35px
