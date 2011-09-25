@@ -1,22 +1,24 @@
 TODO:
-
+  * randomize questions
+  * persistence
   - live update lobby
   * solo results
-  - spr input improvements
-  - multiple choice
-  - solo challenges
-  - info text?
+  - spr input improvements (disable during explanation, style it better)
   - wait/ready screen
+
+BUGS:
+  * IE compatibility
+  * IE? initial signup did not rerender game, blank screen after refresh
+
+LATER:
+  - Use first name, last initial
   - custom OG beat actions
   - bronze/silver/gold league achievements
   - split players by league
   - chat
-  - unsubscribe channels
-  * randomize questions
+  - multiple choice
   - solo challenges
+  - info text?
+  - sound effects
+  - floaties
   - requests / invites
-  * persistence
-
-BUGS:
-  * infinite playerFinish
-  * IE? initial signup did not rerender game, blank screen after refresh

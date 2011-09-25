@@ -19,7 +19,7 @@ class Router extends Backbone.Router
 
   solo: ->
     @authenticate =>
-      SS.server.app.createSoloGame @userId, (gameData) =>
+      SS.server.app.createSoloGame (gameData) =>
         @game(gameData)
 
   multi: (id) ->
@@ -27,22 +27,26 @@ class Router extends Backbone.Router
 
     @authenticate id, =>
       if id == "new"
-        SS.server.app.createTwoPlayerGame @userId, (gameData) =>
+        SS.server.app.createTwoPlayerGame (gameData) =>
           @game(gameData)
       else if id == "join"
-        SS.server.app.autoJoinTwoPlayerGame @userId, (gameData) =>
+        console.log "Auto joining game"
+        SS.server.app.autoJoinTwoPlayerGame (gameData) =>
           console.log "joining:", gameData
           @game(gameData)
 
   joinGame: (id) ->
+    console.log "Joining game #{id}"
     @authenticate id, =>
-      SS.server.app.joinSpecificTwoPlayerGame {gameId: id, userId: @userId}, (gameData) =>
+      SS.server.app.joinSpecificTwoPlayerGame {gameId: id}, (gameData) =>
         @game(gameData)
 
   # Helpers
 
   setView: (viewFunc) ->
     if @currentView?
+      if @currentView.game?
+        console.log "#{@currentView.game.id}: Deleting game view ===================================="
       @currentView.remove()
       delete @currentView
     @currentView = viewFunc()

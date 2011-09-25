@@ -1,11 +1,16 @@
+id = 0
 class TimerView # extends Backbone.View
   constructor: (gameView, @duration, @playerFinish) ->
     @$timer = gameView.$("#timer")
     @$minutes = gameView.$("#timer .minutes")
     @$seconds = gameView.$("#timer .seconds")
+    @id = id++
+    console.log "Constructing timer view:", @id
     @renderRemainingTime(@duration)
+    @stopped = true
 
   start: ->
+    @stopped = false
     currentTime = new Date().getTime() 
     @endTime = new Date(currentTime + @duration * 1000)
     @timerInterval = setInterval @renderTimer, 250
@@ -30,8 +35,15 @@ class TimerView # extends Backbone.View
       @$minutes.html("00")
       @$seconds.html("00")
       @$timer.addClass('finished')
+
+      console.log "Clearing timer interval:", @timerInterval
+
       clearInterval @timerInterval
-      console.log "TimerView#{@id} finished"
-      @playerFinish()
+
+      if @stopped == true
+        console.error "Timer is already stopped"
+      else
+        @playerFinish()
+        @stopped = true
 
 window.TimerView = TimerView

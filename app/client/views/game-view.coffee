@@ -39,22 +39,19 @@ class GameView extends Backbone.View
 
     @continueToNextQuestion() # load first question
 
-    ############ 
     # TODO: clean up?
     @playerViews = {}
-    ############
 
     @renderPlayers()
 
-    SS.events.on "info", (message, channel) =>
-      console.log "GameView #{@game.id} received message on #{channel}"
-      console.log message
+    SS.events.on "game", (message, channel) =>
+      console.log "#{@game.id}: GameView received #{message.action} on #{channel}:", message
 
       if channel == "game/#{@game.id}"
-        console.log "Handling game message"
+        console.log "#{@game.id}: Handling #{message.action}"
         @[message.action](message)
       else
-        console.log "Received game message for wrong game id: #{channel}, should be: #{@game.id}"
+        console.log "#{@game.id}: Received game action #{message.action} for wrong game id: #{channel}"
 
     @$gameStates.hide()
     @.$(".#{@game.state}").show()
@@ -62,8 +59,13 @@ class GameView extends Backbone.View
     @state = @game.state
 
     $(window).bind 'hashchange', =>
-      SS.server.app.clearOpenGames @userId, ->
-        console.log "Finished clearing open games for user:", @userId
+
+  remove: =>
+    if @game.state == 'open'
+      SS.server.app.clearOpenGames =>
+        console.log "#{@game.id}: Finished clearing open games for user:", @userId
+
+    $(@el).remove()
 
   join: (o) ->
     @game.player2 = o.player2
@@ -87,18 +89,24 @@ class GameView extends Backbone.View
     @state = 'start'
 
   playerStart: ->
-    console.log "begin playerStart"
+    console.log "#{@game.id}: begin playerStart"
     SS.server.app.playerStart { userId: @userId, gameId: @game.id }, (result) =>
-      console.log "end playerStart:", result
+      console.log "#{@game.id}: end playerStart:", result
 
   playerFinish: =>
     return if @solo
+    console.log "#{@game.id}: begin playerFinish"
     SS.server.app.playerFinish { userId: @userId, gameId: @game.id }, (result) =>
+      console.log "#{@game.id}: end playerFinish:", result
 
   finish: (o) ->
+    SS.events.unsubscribe 'game'
+    SS.server.app.playerUnsubscribe @game.id, (result) =>
+      console.log "Player #{@userId} unsubscribed from game #{@game.id}"
+
     return if @solo
 
-    console.log "Finished game", o
+    console.log "#{@game.id}: Finished game", o
 
     @$gameStates.hide()
     @$finished.show()
@@ -117,22 +125,22 @@ class GameView extends Backbone.View
     setTimeout (=>
       @$player1DeltaRating.addClass('update')
       if o.player1.deltaRating >= 0
-        console.log "Player 1 gained rank"
+        console.log "#{@game.id}: Player 1 gained rank"
         @$player1Rating.addClass('positive')
         @$player1DeltaRating.addClass('positive')
       else
-        console.log "Player 1 lost rank"
+        console.log "#{@game.id}: Player 1 lost rank"
         @$player1Rating.addClass('negative')
         @$player1DeltaRating.addClass('negative')
 
       
       @$player2DeltaRating.addClass('update')
       if o.player2.deltaRating >= 0
-        console.log "Player 2 gained rank"
+        console.log "#{@game.id}: Player 2 gained rank"
         @$player2Rating.addClass('positive') 
         @$player2DeltaRating.addClass('positive') 
       else
-        console.log "Player 2 lost rank"
+        console.log "#{@game.id}: Player 2 lost rank"
         @$player2Rating.addClass('negative')
         @$player2DeltaRating.addClass('negative')
 
@@ -146,34 +154,28 @@ class GameView extends Backbone.View
       ), 400
     ), 1500
 
-  # This handles a server broadcast of a player's answer.  It's slightly 
-  # awkward that the server comes through here first.
+  # This handles a server broadcast of a player's answer.
   answer: (o) ->
-    ######### playerView stuff
     playerView = @playerViews[o.userId]
     playerView.updatePoints(o.points)
 
     return if @userId == o.userId
 
     playerView.appendAnswer(o.correct)
-    #########
-    
+
   render: ->
-    console.log "Rendering game view for game:", @game.id
+    console.log "-----------------------------------------------------------------------------------"
+    console.log "#{@game.id}: Rendering game view"
 
     template = $("#template-game")
     $(@el).html template.html()
     @$container.html('')
     @$container.prepend(@el)
 
-
-  ############
-  # TODO: construct PlayerView's only when player joins
   renderPlayer: (player) ->
     container = @$players
     playerView = new PlayerView(container, player)
     @playerViews[player.id] = playerView
-  #############
 
   renderPlayers: ->
     @$players.html('')
@@ -225,7 +227,9 @@ class GameView extends Backbone.View
     
     @questionView.showExplanation()
 
-    SS.server.app.answer { userId: @userId, gameId: @game.id, questionId: @currentQuestion, answer: @$answer.val() }, (result) ->
+    console.log "#{@game.id}: begin confirmAnswer"
+    SS.server.app.answer { userId: @userId, gameId: @game.id, questionId: @currentQuestion, answer: @$answer.val() }, (result) =>
+      console.log "#{@game.id}: end confirmAnswer:", result
 
   displayMessage: (message, klass = "") ->
     @$message.html(message)

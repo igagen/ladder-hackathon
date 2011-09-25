@@ -7,14 +7,15 @@ exports.Game = class Game
   NUM_QUESTIONS: 50
   K: 24
 
-  constructor: (@userId1, @duration, @solo, cb) ->
+  constructor: (session, @duration, @solo, cb) ->
+    console.log "Creating new game with session:", session
     @questions = new Array(@NUM_QUESTIONS)
     
     @ratings = {}
 
-    @player1 = new Player(@userId1)
+    @player1 = new Player(session.user_id)
     @players = {}
-    @players[@userId1] = @player1
+    @players[session.user_id] = @player1
 
     @state = 'open'
 
@@ -23,9 +24,9 @@ exports.Game = class Game
 
     @id = GameStore.save(@)
 
-    @start() if @solo
+    session.channel.subscribe("game/#{@id}")
 
-    console.log "Game.create(#{@userId1})"
+    @start() if @solo
 
     cb(@)
 
@@ -46,13 +47,16 @@ exports.Game = class Game
   playerStart: (userId) ->
     player = @players[userId]
     player.started = true
-    console.log "game.playerStart(#{userId})"
-    console.log @players
     if @player1.started && @player2.started
       @start()
 
   playerFinish: (userId) ->
     player = @players[userId]
+
+    if player.finished
+      console.error "Player #{userId} is already finished"
+      return
+
     player.finished = true
     if @player1.finished && (@solo || @player2.finished)
       @finish()
@@ -60,17 +64,16 @@ exports.Game = class Game
   publish: (data) ->
     channel = "game/#{@id}"
 
-    console.log "Publishing 'info' message on channel #{channel}"
+    console.log "Publishing game message on channel #{channel}"
     console.log data
 
-    SS.publish.channel channel, "info", data
+    SS.publish.channel channel, "game", data
 
   ready: ->
     @state = 'ready'
     @publish { action: 'ready' }
 
   start: ->
-    console.log "game.start"
     @state = 'start'
     @publish {action: 'start'}
 
@@ -105,8 +108,8 @@ exports.Game = class Game
     eb = qb / (qa + qb)
 
     # Calculate updated ratings
-    ra = Math.floor(ra + @K * (sa - ea))
-    rb = Math.floor(rb + @K * (sb - eb))
+    ra = Math.round(ra + @K * (sa - ea))
+    rb = Math.round(rb + @K * (sb - eb))
 
     @player1DeltaRating = ra - user1.rating
     @player2DeltaRating = rb - user2.rating
@@ -124,6 +127,10 @@ exports.Game = class Game
       "Draw"
 
   finish: ->
+    if @state == 'finish'
+      console.error "Game #{@id} is already finished"
+      return
+
     @state = 'finish'
 
     return if @solo
@@ -144,14 +151,12 @@ exports.Game = class Game
         rating: @player2.rating()
         deltaRating: @player2DeltaRating
 
-  join: (userId2) ->
-    console.log "Game.join(#{userId2})"
-    @player2 = new Player(userId2)
-    @players[userId2] = @player2
+  join: (session) ->
+    @player2 = new Player(session.user_id)
+    @players[session.user_id] = @player2
+    session.channel.subscribe("game/#{@id}")
     @publish {action: 'join', player2: @player2.gameData()}
     @ready()
-
-  exit: (userId) ->
 
   isOpen: ->
     @state == 'open'

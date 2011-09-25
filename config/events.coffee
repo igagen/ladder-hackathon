@@ -6,7 +6,7 @@ SS.events.on 'client:init', (session) ->
   console.log "The client with Session ID #{session.id} has initialized (loaded or reloaded the page)"
 
 SS.events.on 'client:disconnect', (session) ->
-  SS.server.app.clearOpenGames session.user_id, ->
+  SS.server.app.clearOpenGames  ->
     console.log "The client with Session ID #{session.id} and User ID #{session.user_id} has disconnected"
 
 # SS.events.on 'client:heartbeat', (session) ->
